@@ -1,0 +1,3969 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>班級小幫手（幹部）滿意度統計與志願智慧分發系統</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Zen Maru Gothic（圓潤童趣字體） & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Zen Maru Gothic"', '"Noto Sans TC"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            cream: '#FFFDF5',
+            strawberry: '#FF7EB9',
+            sunshine: '#FFD166',
+            mint: '#06D6A0',
+            sky: '#4CC9F0',
+            grape: '#A78BFA',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* 溫暖奶油色搭配柔和點點底紋 */
+    body {
+      font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+      background-color: #FFFDF5;
+      background-image:
+        radial-gradient(#FFD166 2px, transparent 2px),
+        radial-gradient(#FF7EB9 2px, #FFFDF5 2px);
+      background-size: 48px 48px;
+      background-position: 0 0, 24px 24px;
+      color: #334155;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 立體糖果卡片陰影與圓角風格 */
+    .candy-card {
+      background: #FFFFFF;
+      border-radius: 1.75rem;
+      border-width: 4px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    }
+    .candy-border-pink {
+      border-color: #FFAED3;
+      box-shadow: 0 6px 0 0 #FF7EB9;
+    }
+    .candy-border-yellow {
+      border-color: #FFE29A;
+      box-shadow: 0 6px 0 0 #FFD166;
+    }
+    .candy-border-mint {
+      border-color: #8CF2D4;
+      box-shadow: 0 6px 0 0 #06D6A0;
+    }
+    .candy-border-sky {
+      border-color: #A5E4FA;
+      box-shadow: 0 6px 0 0 #4CC9F0;
+    }
+    .candy-border-grape {
+      border-color: #D2C4FC;
+      box-shadow: 0 6px 0 0 #A78BFA;
+    }
+
+    /* 糖果立體按鈕 */
+    .candy-btn {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+    }
+    .candy-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+    .candy-btn:active {
+      transform: translateY(3px) scale(0.98);
+      box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* 星星點擊放大旋轉動畫 */
+    @keyframes starPop {
+      0% { transform: scale(1) rotate(0deg); }
+      45% { transform: scale(1.45) rotate(18deg); }
+      75% { transform: scale(0.92) rotate(-8deg); }
+      100% { transform: scale(1.1) rotate(0deg); }
+    }
+    .star-btn {
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+      text-shadow: 0 2px 0 rgba(217, 119, 6, 0.2);
+    }
+    .star-btn:hover {
+      transform: scale(1.25) rotate(8deg);
+    }
+    .star-pop-anim {
+      animation: starPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 進場彈跳淡入 */
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+      60% { opacity: 1; transform: translateY(-3px) scale(1.01); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-bounce-in {
+      animation: bounceIn 0.35s ease-out forwards;
+    }
+
+    /* 未評分幹部卡片外框閃爍提醒動畫 */
+    @keyframes unratedFlash {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.75); }
+      50% { transform: scale(1.025); box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
+    }
+    .unrated-flash {
+      animation: unratedFlash 0.65s ease-in-out 3;
+    }
+    @keyframes magicFlip {
+      0%, 100% { transform: rotateY(0deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.18); }
+    }
+    .animate-magic-flip {
+      animation: magicFlip 0.85s ease-in-out infinite;
+    }
+
+    /* 便利貼膠帶裝飾 */
+    .sticky-note {
+      position: relative;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .sticky-note:hover {
+      transform: rotate(0deg) scale(1.03) !important;
+      z-index: 10;
+    }
+    .sticky-note::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 64px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* 可愛捲軸 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFFDF5;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FFD166;
+      border-radius: 9999px;
+      border: 2px solid #FFFDF5;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-pink-200 selection:text-pink-900">
+
+  <!-- 五彩紙花慶祝畫布 (Confetti Canvas) -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- 頂部童趣彩虹糖果導覽列 -->
+  <header class="bg-white/95 backdrop-blur-md border-b-4 border-amber-300 shadow-sm sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <!-- 品牌 Logo 與班級標題 -->
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#FF7EB9] via-[#FFD166] to-[#4CC9F0] p-1 shadow-[0_4px_0_0_#F59E0B] shrink-0">
+            <div class="w-full h-full bg-white rounded-xl flex items-center justify-center text-2xl sm:text-3xl">
+              🐻
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="header-class-badge" class="px-3 py-0.5 rounded-full bg-amber-300 text-amber-950 font-black text-xs sm:text-sm shadow-[0_2px_0_0_#D97706]">
+                🏫 快樂國小 三年甲班
+              </span>
+              <h1 class="text-lg sm:text-2xl font-black text-slate-800 tracking-wide">
+                班級小幫手許願池
+              </h1>
+            </div>
+            <p class="text-xs sm:text-sm font-bold text-pink-500 mt-0.5">
+              🌈 幫現在的幹部拍拍手 · 選出你最想當的班級小幫手 ✨
+            </p>
+          </div>
+        </div>
+
+        <!-- 右側即時可愛狀態膠囊 -->
+        <div class="flex flex-wrap items-center gap-2 self-start md:self-center">
+          <button type="button" onclick="switchTab('settings')" id="header-cloud-status-btn"
+            class="candy-btn px-3 py-1.5 rounded-2xl bg-slate-100 border-2 border-slate-300 text-slate-700 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_3px_0_0_#94A3B8] cursor-pointer">
+            <span id="header-cloud-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+            <span id="header-cloud-text">單機模式（點此連線）</span>
+          </button>
+          <div class="px-3 py-1.5 rounded-2xl bg-pink-100 border-2 border-pink-300 text-pink-900 font-bold text-xs sm:text-sm flex items-center gap-1 shadow-[0_3px_0_0_#FF7EB9]">
+            <span>🎒 全班：</span>
+            <span id="header-roster-count" class="text-base font-black text-pink-700">0</span>
+            <span>人</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-2xl bg-sky-100 border-2 border-sky-300 text-sky-900 font-bold text-xs sm:text-sm flex items-center gap-1 shadow-[0_3px_0_0_#4CC9F0]">
+            <span>🐰 已填：</span>
+            <span id="header-submission-count" class="text-base font-black text-sky-700">0</span>
+            <span>人</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-2xl bg-emerald-100 border-2 border-emerald-300 text-emerald-900 font-bold text-xs sm:text-sm flex items-center gap-1 shadow-[0_3px_0_0_#06D6A0]">
+            <span>🌟 名額：</span>
+            <span id="header-quota-count" class="text-base font-black text-emerald-700">0</span>
+            <span>位</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 四大可愛膠囊分頁導覽列 -->
+      <nav class="mt-3 pt-2.5 border-t-2 border-dashed border-amber-200">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3" role="tablist">
+          <button type="button" onclick="switchTab('form')" id="tab-btn-form"
+            class="tab-btn candy-btn flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-2xl font-black text-xs sm:text-base cursor-pointer">
+            <span class="text-lg sm:text-xl">✏️</span>
+            <span>小朋友填一填</span>
+          </button>
+
+          <button type="button" onclick="switchTab('dashboard')" id="tab-btn-dashboard"
+            class="tab-btn candy-btn flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-2xl font-black text-xs sm:text-base cursor-pointer">
+            <span class="text-lg sm:text-xl">🏆</span>
+            <span>班級榮譽榜</span>
+          </button>
+
+          <button type="button" onclick="switchTab('distribution')" id="tab-btn-distribution"
+            class="tab-btn candy-btn flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-2xl font-black text-xs sm:text-base cursor-pointer">
+            <span class="text-lg sm:text-xl">🎲</span>
+            <span>幸運小抽籤</span>
+          </button>
+
+          <button type="button" onclick="switchTab('settings')" id="tab-btn-settings"
+            class="tab-btn candy-btn flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-2xl font-black text-xs sm:text-base cursor-pointer">
+            <span class="text-lg sm:text-xl">🛠️</span>
+            <span>老師魔法箱</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主內容區塊 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- ========================================================= -->
+    <!-- 分頁 1：✏️ 小朋友填一填（滿意度＋選志願）                    -->
+    <!-- ========================================================= -->
+    <section id="view-form" class="tab-view space-y-7 animate-bounce-in">
+      <!-- 歡迎小熊橫幅 -->
+      <div class="candy-card candy-border-sky p-4 sm:p-5 bg-gradient-to-r from-sky-50 via-white to-pink-50 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-sky-200/70 flex items-center justify-center text-3xl sm:text-4xl shrink-0">
+          🐻
+        </div>
+        <div>
+          <h2 class="text-base sm:text-xl font-black text-slate-800">
+            嗨！歡迎來到班級小幫手許願池 🌈
+          </h2>
+          <p class="text-xs sm:text-sm font-bold text-slate-600 mt-1 leading-relaxed">
+            請跟著下面 4 個簡單步驟，幫這學期辛苦的幹部拍拍手，再選出你下學期最想擔任的小幫手職務喔！
+          </p>
+        </div>
+      </div>
+
+      <form id="student-survey-form" novalidate class="space-y-7">
+        <!-- 步驟一：🙋‍♀️ 我是誰？（下拉選單直接選座號與姓名） -->
+        <div class="candy-card candy-border-pink p-5 sm:p-7">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="px-3.5 py-1 rounded-full bg-pink-500 text-white font-black text-xs sm:text-sm shadow-[0_3px_0_0_#BE185D]">
+                步驟 1
+              </span>
+              <h3 class="text-lg sm:text-2xl font-black text-slate-800">🙋‍♀️ 我是誰？</h3>
+            </div>
+            <span class="text-xs font-bold text-pink-600 bg-pink-50 px-3 py-1 rounded-full border-2 border-pink-200">
+              ★ 不用打字，直接從選單點自己的名字喔！
+            </span>
+          </div>
+
+          <div class="space-y-3">
+            <label for="select-student" class="block text-sm sm:text-base font-black text-slate-700">
+              🎒 請選擇你的座號與姓名 <span class="text-pink-500">*</span>
+            </label>
+            <div class="relative">
+              <select id="select-student" onchange="handleStudentSelectChange()"
+                class="w-full px-4 sm:px-5 py-4 rounded-2xl border-3 border-pink-300 focus:border-pink-500 focus:ring-4 focus:ring-pink-200 outline-hidden text-lg sm:text-2xl font-black text-slate-800 bg-pink-50/50 focus:bg-white transition cursor-pointer">
+                <option value="">👇 請點這裡選擇你的座號和名字 👇</option>
+              </select>
+            </div>
+            <p id="student-select-error" class="text-xs sm:text-sm font-bold text-rose-600 hidden"></p>
+
+            <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+              <p class="text-xs sm:text-sm font-bold text-slate-500">
+                找不到自己的名字嗎？請舉手跟老師說一聲喔 🙋‍♂️
+              </p>
+              <span id="form-progress-hint" class="text-xs font-black text-pink-600 bg-pink-50 px-2.5 py-1 rounded-lg">
+                目前全班已有 0 / 0 位同學完成
+              </span>
+            </div>
+          </div>
+
+          <!-- 選擇學生後的可愛歡迎卡片 -->
+          <div id="selected-student-welcome" class="hidden mt-5 p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-amber-50 to-sky-50 border-3 border-pink-200 flex items-center gap-3.5 animate-bounce-in">
+            <div class="w-12 h-12 rounded-2xl bg-white border-2 border-pink-200 flex items-center justify-center text-2xl sm:text-3xl shrink-0 shadow-xs">
+              🐱
+            </div>
+            <p id="selected-student-welcome-text" class="text-sm sm:text-lg font-black text-slate-800 leading-snug">
+              嗨！歡迎來當小評審與許願小天使 ✨
+            </p>
+          </div>
+
+          <!-- 若該學生已經交過心願單：溫馨提示框與一鍵回填按鈕 -->
+          <div id="existing-submission-alert" class="hidden mt-4 p-4 rounded-2xl bg-amber-50 border-3 border-amber-300 shadow-[0_4px_0_0_#FBBF24] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-bounce-in">
+            <div class="flex items-start sm:items-center gap-3">
+              <span class="text-2xl sm:text-3xl shrink-0">🐰</span>
+              <div class="text-xs sm:text-sm font-bold text-amber-950 leading-relaxed" id="existing-submission-text">
+                你之前已經送出過心願單囉！如果想修改星星或志願，可以點右邊按鈕載入原本的內容喔～
+              </div>
+            </div>
+            <button type="button" id="btn-load-existing"
+              class="candy-btn px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#D97706] cursor-pointer shrink-0">
+              📥 載入我原本填的內容來修改
+            </button>
+          </div>
+        </div>
+
+        <!-- 步驟二：⭐ 給現在的幹部拍拍手！ -->
+        <div class="candy-card candy-border-yellow p-5 sm:p-7">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div class="flex items-center gap-2.5">
+              <span class="px-3.5 py-1 rounded-full bg-amber-400 text-amber-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#D97706]">
+                步驟 2
+              </span>
+              <div>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-800">⭐ 給現在的幹部拍拍手！</h3>
+                <p class="text-xs sm:text-sm font-bold text-slate-500">請親自幫每位辛苦服務的小幫手點亮 1～5 顆大星星喔！</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 動態渲染各幹部星等評分卡片 -->
+          <div id="form-ratings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- JS 動態生成 -->
+          </div>
+          <p id="ratings-error" class="text-xs sm:text-sm font-bold text-rose-600 mt-3 hidden"></p>
+        </div>
+
+        <!-- 步驟三：💌 悄悄話信箱（不記名） -->
+        <div class="candy-card candy-border-grape p-5 sm:p-7">
+          <div class="flex items-center gap-2.5 mb-3">
+            <span class="px-3.5 py-1 rounded-full bg-purple-400 text-white font-black text-xs sm:text-sm shadow-[0_3px_0_0_#7C3AED]">
+              步驟 3
+            </span>
+            <div>
+              <h3 class="text-lg sm:text-2xl font-black text-slate-800">💌 悄悄話信箱（不記名）</h3>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">這張小紙條不會顯示名字，可以寫下你想感謝誰，或給班上的小小建議喔！（沒寫也沒關係）</p>
+            </div>
+          </div>
+
+          <textarea id="input-feedback" rows="3" maxlength="200"
+            placeholder="例如：謝謝衛生股長每天帶我們掃地，教室變得好乾淨！希望午餐小幫手打菜時可以多給一點青菜～"
+            class="w-full px-4 py-3 rounded-2xl border-3 border-purple-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-hidden text-sm sm:text-base font-bold text-slate-700 bg-purple-50/30 focus:bg-white transition resize-y"></textarea>
+        </div>
+
+        <!-- 步驟四：🎯 我想當什麼小幫手？ -->
+        <div class="candy-card candy-border-mint p-5 sm:p-7">
+          <div class="flex items-center gap-2.5 mb-4">
+            <span class="px-3.5 py-1 rounded-full bg-emerald-400 text-emerald-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#059669]">
+              步驟 4
+            </span>
+            <div>
+              <h3 class="text-lg sm:text-2xl font-black text-slate-800">🎯 我想當什麼小幫手？</h3>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">請選出 3 個你最想擔任的職務（不可以重複選同一個喔！）</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- 第一志願 -->
+            <div class="p-4 rounded-2xl bg-amber-50 border-3 border-amber-300 shadow-[0_4px_0_0_#FBBF24]">
+              <label for="select-choice-1" class="flex items-center justify-between text-base font-black text-amber-950 mb-2">
+                <span>🥇 第一志願 <span class="text-pink-500">*</span></span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-300 text-amber-950">最想當！</span>
+              </label>
+              <select id="select-choice-1" onchange="handleChoiceChange()"
+                class="w-full px-3 py-3 rounded-xl border-2 border-amber-300 bg-white font-bold text-sm text-slate-800 focus:border-amber-500 outline-hidden cursor-pointer">
+                <option value="">-- 點這裡選第一志願 --</option>
+              </select>
+            </div>
+
+            <!-- 第二志願 -->
+            <div class="p-4 rounded-2xl bg-sky-50 border-3 border-sky-300 shadow-[0_4px_0_0_#38BDF8]">
+              <label for="select-choice-2" class="flex items-center justify-between text-base font-black text-sky-950 mb-2">
+                <span>🥈 第二志願 <span class="text-pink-500">*</span></span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-sky-200 text-sky-900">也很喜歡</span>
+              </label>
+              <select id="select-choice-2" onchange="handleChoiceChange()"
+                class="w-full px-3 py-3 rounded-xl border-2 border-sky-300 bg-white font-bold text-sm text-slate-800 focus:border-sky-500 outline-hidden cursor-pointer">
+                <option value="">-- 點這裡選第二志願 --</option>
+              </select>
+            </div>
+
+            <!-- 第三志願 -->
+            <div class="p-4 rounded-2xl bg-emerald-50 border-3 border-emerald-300 shadow-[0_4px_0_0_#34D399]">
+              <label for="select-choice-3" class="flex items-center justify-between text-base font-black text-emerald-950 mb-2">
+                <span>🥉 第三志願 <span class="text-pink-500">*</span></span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-200 text-emerald-900">第三個選擇</span>
+              </label>
+              <select id="select-choice-3" onchange="handleChoiceChange()"
+                class="w-full px-3 py-3 rounded-xl border-2 border-emerald-300 bg-white font-bold text-sm text-slate-800 focus:border-emerald-500 outline-hidden cursor-pointer">
+                <option value="">-- 點這裡選第三志願 --</option>
+              </select>
+            </div>
+          </div>
+          <p id="choices-error" class="text-xs sm:text-sm font-bold text-rose-600 mt-3 hidden"></p>
+
+          <!-- 選填：我的服務宣言 -->
+          <div class="mt-5 pt-4 border-t-2 border-dashed border-emerald-200">
+            <label for="input-pitch" class="block text-sm font-black text-slate-700 mb-1.5">
+              🌈 我的服務宣言 <span class="text-xs font-bold text-slate-400">（選填，寫下你為什麼適合當小幫手！）</span>
+            </label>
+            <input type="text" id="input-pitch" maxlength="120"
+              placeholder="例如：我每天都很準時到學校，而且很喜歡幫忙老師和同學！"
+              class="w-full px-4 py-2.5 rounded-xl border-2 border-emerald-200 focus:border-emerald-400 outline-hidden text-sm font-bold text-slate-700 bg-emerald-50/30 focus:bg-white transition" />
+            <div class="flex flex-wrap items-center gap-1.5 mt-2">
+              <span class="text-xs font-bold text-slate-400">✨ 點擊快速填入：</span>
+              <button type="button" onclick="applyPitchSuggestion('我每天都很準時，會認真把任務做好！')"
+                class="px-2.5 py-1 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs transition cursor-pointer">
+                🙋‍♂️ 準時認真負責
+              </button>
+              <button type="button" onclick="applyPitchSuggestion('我很喜歡幫忙老師和同學，大家有需要都可以找我！')"
+                class="px-2.5 py-1 rounded-full bg-sky-100 hover:bg-sky-200 text-sky-900 font-bold text-xs transition cursor-pointer">
+                🤝 熱心幫助同學
+              </button>
+              <button type="button" onclick="applyPitchSuggestion('我會細心檢查每一件事，讓班上變得更整齊乾淨！')"
+                class="px-2.5 py-1 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition cursor-pointer">
+                🌟 細心愛乾淨
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 送出心願單大按鈕 -->
+        <div class="pt-2 pb-4 flex flex-col items-center gap-3">
+          <button type="submit"
+            class="candy-btn w-full sm:w-auto px-10 py-4 rounded-3xl bg-gradient-to-r from-[#FF7EB9] via-[#FF65A3] to-[#FFD166] text-white border-4 border-pink-300 font-black text-lg sm:text-2xl shadow-[0_7px_0_0_#BE185D] cursor-pointer flex items-center justify-center gap-3">
+            <span>🚀 送出我的心願單！</span>
+          </button>
+          <p class="text-xs sm:text-sm font-bold text-slate-500">
+            送出前請檢查：1. 選好座號姓名 2. 每位幹部都給星星 3. 選好三個不同志願 ✨
+          </p>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 分頁 2：🏆 班級榮譽榜（滿意度統計與悄悄話牆）                 -->
+    <!-- ========================================================= -->
+    <section id="view-dashboard" class="tab-view hidden space-y-7 animate-bounce-in">
+      <!-- 填寫進度追蹤橫幅 -->
+      <div class="candy-card candy-border-sky p-4 sm:p-5 bg-gradient-to-r from-sky-50 via-white to-amber-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">📊</span>
+          <div>
+            <h2 class="text-base sm:text-xl font-black text-slate-800">全班小幫手榮譽榜與愛心統計</h2>
+            <p id="dashboard-unsubmitted-hint" class="text-xs sm:text-sm font-bold text-pink-600 mt-0.5">
+              ⏳ 尚未填寫的小朋友：計算中...
+            </p>
+          </div>
+        </div>
+        <button type="button" onclick="switchTab('form')"
+          class="candy-btn px-4 py-2 rounded-2xl bg-pink-500 text-white font-black text-xs sm:text-sm shadow-[0_3px_0_0_#BE185D] cursor-pointer self-start sm:self-center shrink-0">
+          ✏️ 我也要去填寫
+        </button>
+      </div>
+
+      <!-- 4 張關鍵榮譽指標卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. 全班填答進度 -->
+        <div class="candy-card candy-border-sky p-5 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-100 text-3xl flex items-center justify-center shrink-0">
+            🎒
+          </div>
+          <div>
+            <p class="text-xs sm:text-sm font-black text-sky-600">全班完成人數</p>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="stat-total-responses" class="text-3xl font-black text-slate-800">0</span>
+              <span id="stat-roster-total-sub" class="text-xs font-bold text-slate-500">/ 0 人</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 全班平均愛心星等 -->
+        <div class="candy-card candy-border-pink p-5 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-pink-100 text-3xl flex items-center justify-center shrink-0">
+            💖
+          </div>
+          <div>
+            <p class="text-xs sm:text-sm font-black text-pink-600">全班平均愛心星等</p>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="stat-overall-avg" class="text-3xl font-black text-slate-800">0.0</span>
+              <span class="text-xs font-bold text-amber-500">★ / 5.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 滿分人氣王幹部 -->
+        <div class="candy-card candy-border-yellow p-5 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-100 text-3xl flex items-center justify-center shrink-0">
+            🌟
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs sm:text-sm font-black text-amber-600">滿分人氣王幹部</p>
+            <p id="stat-popular-role" class="text-lg sm:text-xl font-black text-slate-800 truncate mt-0.5">--</p>
+            <p id="stat-popular-score" class="text-xs font-bold text-amber-700 truncate">等待大家投票中</p>
+          </div>
+        </div>
+
+        <!-- 4. 最佳服務小幫手（正向鼓勵指標） -->
+        <div class="candy-card candy-border-mint p-5 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-3xl flex items-center justify-center shrink-0">
+            👏
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs sm:text-sm font-black text-emerald-600">最佳服務小幫手</p>
+            <p id="stat-service-role" class="text-lg sm:text-xl font-black text-slate-800 truncate mt-0.5">--</p>
+            <p id="stat-service-score" class="text-xs font-bold text-emerald-700 truncate">每位幹部都超棒！</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 各職務愛心星等統計橫條卡片區 -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white/90 px-5 py-3.5 rounded-2xl border-3 border-amber-200">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🌈</span>
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-slate-800">各職務小幫手愛心星等統計</h2>
+              <p class="text-xs font-bold text-slate-500">看看大家送給每位小幫手多少顆閃亮星星！</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600">
+            <span>排列順序：</span>
+            <select id="dashboard-sort" onchange="renderDashboard()"
+              class="px-3 py-1.5 rounded-xl border-2 border-amber-300 bg-amber-50 font-black text-amber-950 outline-hidden cursor-pointer">
+              <option value="default">依職務順序排列</option>
+              <option value="score-desc">依星等由高到低 ⭐</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="dashboard-roles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- JS 動態渲染各職務星等統計條 -->
+        </div>
+      </div>
+
+      <!-- 💌 班級悄悄話便利貼牆 -->
+      <div class="candy-card candy-border-grape p-5 sm:p-7">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">💌</span>
+            <div>
+              <h3 class="text-lg sm:text-2xl font-black text-slate-800">班級悄悄話便利貼牆</h3>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">這裡貼滿了同學們寫下的感謝與暖心鼓勵（全部都不記名喔！）</p>
+            </div>
+          </div>
+          <span id="feedback-count-badge" class="px-4 py-1.5 rounded-full bg-purple-100 border-2 border-purple-300 text-purple-800 font-black text-xs sm:text-sm self-start">
+            0 張便利貼
+          </span>
+        </div>
+
+        <div id="anonymous-feedback-wall" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+          <!-- JS 動態渲染粉黃、粉藍、粉紅、薄荷綠斜角便利貼 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 分頁 3：🎲 幸運小抽籤（志願智慧分發）                         -->
+    <!-- ========================================================= -->
+    <section id="view-distribution" class="tab-view hidden space-y-7 animate-bounce-in">
+      <!-- 抽籤規則與魔法按鈕卡片 -->
+      <div class="candy-card candy-border-yellow p-5 sm:p-7 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-amber-200">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl sm:text-4xl">🎰</span>
+            <div>
+              <h2 class="text-lg sm:text-2xl font-black text-slate-800">幸運小抽籤 · 魔法小幫手分發機</h2>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">公平又好玩的隨機抽籤，幫每位同學安排最適合的小幫手任務！</p>
+            </div>
+          </div>
+          <div class="px-4 py-2 rounded-2xl bg-amber-100 border-2 border-amber-300 text-amber-950 font-black text-xs sm:text-sm self-start">
+            參加抽籤：<span id="dist-eligible-count" class="text-pink-600 text-base">0</span> 人 ／ 總名額：<span id="dist-total-slots" class="text-emerald-700 text-base">0</span> 位
+          </div>
+        </div>
+
+        <!-- 兩種抽籤模式選擇 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 模式一 -->
+          <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-3 border-slate-200 bg-slate-50/60 hover:border-pink-300 cursor-pointer transition has-[:checked]:border-pink-400 has-[:checked]:bg-pink-50/70 has-[:checked]:shadow-[0_4px_0_0_#FF7EB9]">
+            <input type="radio" name="dist-mode" value="priority_round" checked class="mt-1.5 w-5 h-5 accent-pink-500 cursor-pointer" />
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-black text-base text-slate-800">模式一：志願序優先抽籤制</span>
+                <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-pink-200 text-pink-900">分輪大抽籤</span>
+              </div>
+              <p class="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+                第一志願先一起抽，如果超過名額就公平抽籤；沒抽中的同學接著抽第二志願、第三志願！
+              </p>
+            </div>
+          </label>
+
+          <!-- 模式二 -->
+          <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-3 border-slate-200 bg-slate-50/60 hover:border-sky-300 cursor-pointer transition has-[:checked]:border-sky-400 has-[:checked]:bg-sky-50/70 has-[:checked]:shadow-[0_4px_0_0_#4CC9F0]">
+            <input type="radio" name="dist-mode" value="rsd" class="mt-1.5 w-5 h-5 accent-sky-500 cursor-pointer" />
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-black text-base text-slate-800">模式二：幸運號碼牌分發制 (RSD)</span>
+                <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-sky-200 text-sky-900">排隊選志願</span>
+              </div>
+              <p class="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+                全班先隨機抽幸運號碼牌（1號到最後1號），輪到你的號碼時，直接錄取你還有名額的最高志願！
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- 小精靈隨機補位開關 + 開始魔法抽籤按鈕 -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-3 border-t-2 border-dashed border-amber-200">
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-200 cursor-pointer select-none">
+              <input type="checkbox" id="checkbox-auto-fill" checked class="w-5 h-5 rounded accent-emerald-500 cursor-pointer" />
+              <span class="text-xs sm:text-sm font-black text-emerald-950">
+                🍀 沒抽中志願時，由小精靈隨機安排其他小幫手職務
+              </span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-2xl bg-sky-50 border-2 border-sky-200 cursor-pointer select-none">
+              <input type="checkbox" id="checkbox-include-unsubmitted" onchange="renderDistributionView()" class="w-5 h-5 rounded accent-sky-500 cursor-pointer" />
+              <span class="text-xs sm:text-sm font-black text-sky-950">
+                🎒 隨機補位時，連同班級名單中「尚未填表」的同學也一起安排職務
+              </span>
+            </label>
+          </div>
+
+          <button type="button" onclick="triggerMagicLottery()"
+            class="candy-btn px-8 py-4 rounded-3xl bg-gradient-to-r from-[#FFD166] via-[#FF7EB9] to-[#A78BFA] text-slate-900 border-3 border-amber-400 font-black text-lg sm:text-xl shadow-[0_6px_0_0_#D97706] cursor-pointer flex items-center justify-center gap-2 shrink-0">
+            <span>🎰 開始魔法抽籤！</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 分發結果展示區 -->
+      <div id="distribution-results-wrapper" class="space-y-7">
+        <!-- 達成率統計徽章卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+          <div class="candy-card candy-border-yellow p-5 flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-black text-amber-600">🥇 第一志願達成率</p>
+              <p id="dist-metric-first-rate" class="text-3xl font-black text-slate-800 mt-1">--%</p>
+              <p id="dist-metric-first-sub" class="text-xs font-bold text-slate-500 mt-0.5">點擊上方按鈕開始抽籤</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-3xl flex items-center justify-center">🥇</div>
+          </div>
+
+          <div class="candy-card candy-border-mint p-5 flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-black text-emerald-600">🌈 前三志願總達成率</p>
+              <p id="dist-metric-top3-rate" class="text-3xl font-black text-slate-800 mt-1">--%</p>
+              <p id="dist-metric-top3-sub" class="text-xs font-bold text-slate-500 mt-0.5">點擊上方按鈕開始抽籤</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-3xl flex items-center justify-center">🌈</div>
+          </div>
+
+          <div class="candy-card candy-border-sky p-5 flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-black text-sky-600">🐻 尚未分配人數</p>
+              <p id="dist-metric-unassigned" class="text-3xl font-black text-slate-800 mt-1">-- 人</p>
+              <p id="dist-metric-unassigned-sub" class="text-xs font-bold text-slate-500 mt-0.5">點擊上方按鈕開始抽籤</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-sky-100 text-3xl flex items-center justify-center">🐻</div>
+          </div>
+        </div>
+
+        <!-- 🏅 班級幹部當選榮譽榜卡片區 -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 p-4 sm:px-6 rounded-2xl border-3 border-pink-200">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl sm:text-3xl">🏅</span>
+              <div>
+                <h3 class="text-lg sm:text-xl font-black text-slate-800">班級幹部當選榮譽榜</h3>
+                <p id="dist-timestamp-label" class="text-xs font-bold text-slate-500">尚未執行抽籤</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button type="button" onclick="exportDistributionCSV()"
+                class="candy-btn px-4 py-2.5 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-sky-300 text-sky-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#38BDF8] cursor-pointer flex items-center gap-1.5">
+                <span>📥 下載 CSV 名單</span>
+              </button>
+              <button type="button" onclick="copyAnnouncementText()"
+                class="candy-btn px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-500 border-2 border-emerald-500 text-emerald-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#059669] cursor-pointer flex items-center gap-1.5">
+                <span>📋 複製班級 LINE 群組公告文字</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="dist-role-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- JS 動態渲染各職務當選榮譽卡 -->
+          </div>
+        </div>
+
+        <!-- 全班座號總表 -->
+        <div class="candy-card candy-border-sky overflow-hidden">
+          <div class="px-5 py-4 bg-sky-50 border-b-3 border-sky-200 flex items-center justify-between">
+            <h3 class="text-base sm:text-lg font-black text-sky-950 flex items-center gap-2">
+              <span>📋 全班座號當選總表</span>
+            </h3>
+            <span id="dist-table-summary" class="text-xs font-black px-3 py-1 rounded-full bg-white text-sky-700 border-2 border-sky-200"></span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="bg-sky-50/60 text-sky-900 border-b-2 border-sky-200 text-xs sm:text-sm font-black">
+                  <th class="py-3.5 px-4">座號</th>
+                  <th class="py-3.5 px-4">姓名</th>
+                  <th class="py-3.5 px-4">當選小幫手職務</th>
+                  <th class="py-3.5 px-4">錄取志願徽章</th>
+                  <th class="py-3.5 px-4">我的服務宣言</th>
+                </tr>
+              </thead>
+              <tbody id="dist-roster-tbody" class="divide-y-2 divide-slate-100 font-bold">
+                <!-- JS 動態渲染全班座號總表 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 分頁 4：🛠️ 老師魔法箱（班級名單、職務管理與模擬體驗）          -->
+    <!-- ========================================================= -->
+    <section id="view-settings" class="tab-view hidden space-y-7 animate-bounce-in">
+      <!-- ☁️ Firebase 多人即時連線設定中心 -->
+      <div class="candy-card candy-border-sky p-5 sm:p-6 bg-gradient-to-r from-sky-50 via-white to-emerald-50 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-dashed border-sky-200">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl sm:text-4xl">☁️</span>
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-slate-800">Firebase 多人即時連線設定中心</h2>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">
+                貼上您的 Firebase 設定並開啟教室連線，即可產生專屬網址讓全班平板同步填寫！
+              </p>
+            </div>
+          </div>
+          <span id="cloud-panel-badge" class="px-3.5 py-1.5 rounded-full bg-slate-100 border-2 border-slate-300 text-slate-700 font-black text-xs sm:text-sm self-start">
+            ⚪ 目前為單機模式
+          </span>
+        </div>
+
+        <!-- 未連線設定表單 -->
+        <div id="cloud-setup-form" class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <div class="lg:col-span-7 space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label for="input-firebase-config" class="text-xs sm:text-sm font-black text-sky-950">
+                1️⃣ 貼上您的 <code class="bg-white px-1.5 py-0.5 rounded border border-sky-200">firebaseConfig</code>（直接從 Firebase 控制台複製貼上即可）
+              </label>
+              <button type="button" id="btn-use-builtin-firebase" onclick="connectWithBuiltinFirebase()"
+                class="hidden candy-btn px-3 py-1 rounded-xl bg-amber-300 hover:bg-amber-400 text-amber-950 font-black text-xs cursor-pointer">
+                ⚡ 使用預設雲端環境一鍵連線
+              </button>
+            </div>
+            <textarea id="input-firebase-config" rows="4"
+              placeholder='可直接貼上整段 const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "...", appId: "..." };'
+              class="w-full px-3.5 py-2.5 rounded-2xl border-2 border-sky-300 bg-white font-mono text-xs text-slate-800 focus:border-sky-500 outline-hidden resize-y"></textarea>
+          </div>
+
+          <div class="lg:col-span-5 space-y-3 bg-white/90 p-4 rounded-2xl border-2 border-sky-200">
+            <div>
+              <label for="input-room-code" class="block text-xs sm:text-sm font-black text-sky-950 mb-1">
+                2️⃣ 設定班級連線代碼（Room Code）
+              </label>
+              <div class="flex gap-2">
+                <input type="text" id="input-room-code" maxlength="16" placeholder="例如：3A-8821"
+                  class="flex-1 px-3.5 py-2 rounded-xl border-2 border-sky-300 bg-sky-50/40 font-black text-base text-sky-900 focus:border-sky-500 outline-hidden" />
+                <button type="button" onclick="generateRandomRoomCode()"
+                  class="candy-btn px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 font-black text-xs cursor-pointer shrink-0">
+                  🎲 隨機代碼
+                </button>
+              </div>
+            </div>
+
+            <button type="button" onclick="handleTeacherConnectFirebase()"
+              class="candy-btn w-full py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-emerald-400 text-slate-950 border-2 border-sky-500 font-black text-sm sm:text-base shadow-[0_4px_0_0_#0284C7] cursor-pointer">
+              🚀 啟動雲端多人即時連線
+            </button>
+
+            <details class="text-xs font-bold text-slate-600 pt-1">
+              <summary class="cursor-pointer text-sky-700 font-black hover:underline">
+                💡 第一次使用自己的 Firebase？點我看 2 個必開設定
+              </summary>
+              <div class="mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5 leading-relaxed text-[11px]">
+                <p>1. 前往 Firebase 控制台 → <strong>Authentication（驗證）</strong> → Sign-in method → 開啟 <strong>「匿名 (Anonymous)」</strong>登入。</p>
+                <p>2. 前往 <strong>Firestore Database → 規則 (Rules)</strong>，貼上以下規則並發布：</p>
+                <pre class="bg-white p-2 rounded border border-amber-300 overflow-x-auto font-mono text-[10px] text-slate-800">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/public/data/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- 已連線成功控制台 -->
+        <div id="cloud-connected-panel" class="hidden space-y-4">
+          <div class="p-4 rounded-2xl bg-emerald-50 border-3 border-emerald-300 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-3 py-1 rounded-full bg-emerald-500 text-white font-black text-xs">🟢 即時同步運作中</span>
+                <span class="text-sm sm:text-base font-black text-emerald-950">
+                  班級連線代碼：<span id="connected-room-code-display" class="text-lg text-pink-600 underline decoration-wavy">--</span>
+                </span>
+              </div>
+              <p class="text-xs font-bold text-emerald-800 break-all">
+                連線使用者完整 UID：<code id="connected-user-uid-display" class="bg-white px-2 py-0.5 rounded border border-emerald-200 font-mono text-[11px]">--</code>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button type="button" onclick="copyStudentShareLink()"
+                class="candy-btn px-4 py-2.5 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white font-black text-xs sm:text-sm shadow-[0_4px_0_0_#BE185D] cursor-pointer flex items-center gap-1.5">
+                <span>🔗 複製學生專屬連線網址</span>
+              </button>
+              <button type="button" onclick="disconnectCloudSync()"
+                class="candy-btn px-3.5 py-2.5 rounded-2xl bg-white hover:bg-rose-50 border-2 border-rose-300 text-rose-700 font-black text-xs sm:text-sm cursor-pointer">
+                🔌 中斷連線
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-white border-2 border-sky-200 flex flex-col sm:flex-row sm:items-center gap-2">
+            <span class="text-xs font-black text-sky-900 shrink-0">📱 學生端連線網址預覽：</span>
+            <input type="text" id="student-share-url-preview" readonly
+              class="flex-1 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-600 outline-hidden" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 頂部：班級名稱設定 + 老師魔法體驗工具 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 班級名稱設定 (5欄) -->
+        <div class="lg:col-span-5 candy-card candy-border-yellow p-5 sm:p-6 flex flex-col justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-black text-slate-800 mb-1 flex items-center gap-2">
+              <span>🏫 班級名稱設定</span>
+            </h2>
+            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">連線後自動雲端即時同步</span>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <input type="text" id="input-class-name" maxlength="15" placeholder="例如：三年二班"
+              class="flex-1 px-4 py-2.5 rounded-2xl border-3 border-amber-200 focus:border-amber-400 outline-hidden font-black text-base text-slate-800 bg-amber-50/40 focus:bg-white" />
+            <button type="button" onclick="saveClassNameSetting()"
+              class="candy-btn px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-sm shadow-[0_3px_0_0_#D97706] cursor-pointer shrink-0">
+              💾 儲存名稱
+            </button>
+          </div>
+        </div>
+
+        <!-- 老師魔法體驗工具 (7欄) -->
+        <div class="lg:col-span-7 candy-card candy-border-grape p-5 sm:p-6 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+              <span>🪄 老師快速測試與資料重置工具</span>
+            </h3>
+            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">資料自動儲存在本機瀏覽器</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- 一鍵載入全班模擬填報資料 -->
+            <button type="button" onclick="confirmLoadFullClassMock()"
+              class="candy-btn p-3.5 rounded-2xl bg-purple-100 hover:bg-purple-200 border-2 border-purple-300 text-left shadow-[0_3px_0_0_#A78BFA] cursor-pointer">
+              <div class="font-black text-xs sm:text-sm text-purple-950">🧪 一鍵載入全班模擬填報</div>
+              <p class="text-[11px] font-bold text-purple-800/80 mt-1">依目前班級名單產生模擬評分與志願</p>
+            </button>
+
+            <!-- 還原預設 24 人名單 -->
+            <button type="button" onclick="confirmRestoreDefaultRoster()"
+              class="candy-btn p-3.5 rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 text-left shadow-[0_3px_0_0_#4CC9F0] cursor-pointer">
+              <div class="font-black text-xs sm:text-sm text-sky-950">🔄 還原預設 24 人名單</div>
+              <p class="text-[11px] font-bold text-sky-800/80 mt-1">恢復預設 01～24 號學生名單與範例</p>
+            </button>
+
+            <!-- 清空所有填報紀錄 -->
+            <button type="button" onclick="confirmClearAllSubmissions()"
+              class="candy-btn p-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 text-left shadow-[0_3px_0_0_#FB7185] cursor-pointer">
+              <div class="font-black text-xs sm:text-sm text-rose-900">🧹 清空所有填報紀錄</div>
+              <p class="text-[11px] font-bold text-rose-700/80 mt-1">保留班級名單與職務，歸零準備正式填寫</p>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主管理區：左側「📋 班級學生名單管理」 + 右側「🌟 小幫手職務與名額管理」 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- 左側（7欄）：📋 班級學生名單管理系統 -->
+        <div class="lg:col-span-7 candy-card candy-border-pink p-5 sm:p-6 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-dashed border-pink-200">
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2">
+                <span>📋 班級學生名單管理</span>
+              </h2>
+              <p class="text-xs font-bold text-slate-500 mt-0.5">
+                編輯後的名單會即時同步到「✏️ 小朋友填一填」的下拉選單！
+              </p>
+            </div>
+            <span id="roster-progress-badge" class="px-3.5 py-1.5 rounded-full bg-pink-100 border-2 border-pink-300 text-pink-900 font-black text-xs sm:text-sm self-start">
+              全班共 24 人｜已完成 12 人｜尚未填寫 12 人
+            </span>
+          </div>
+
+          <!-- 貼心進度追蹤：⏳ 還沒填寫的小朋友名單 -->
+          <div class="p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-300 space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <span class="text-xs sm:text-sm font-black text-amber-950 flex items-center gap-1.5">
+                <span>⏳ 還沒填寫的小朋友名單</span>
+                <span id="unsubmitted-count-pill" class="px-2 py-0.5 rounded-full bg-amber-300 text-amber-950 text-xs">0 人</span>
+              </span>
+              <button type="button" onclick="copyUnsubmittedNames()"
+                class="candy-btn px-3 py-1 rounded-xl bg-white hover:bg-amber-100 border-2 border-amber-300 text-amber-900 font-black text-xs cursor-pointer">
+                📋 一鍵複製未填名單
+              </button>
+            </div>
+            <p id="settings-unsubmitted-text" class="text-xs sm:text-sm font-bold text-pink-700 leading-relaxed">
+              太棒了！全班都填寫完成囉！🎉
+            </p>
+          </div>
+
+          <!-- 方式 A：單筆快速新增學生 -->
+          <div class="p-4 rounded-2xl bg-pink-50/70 border-2 border-pink-200 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <p class="text-xs sm:text-sm font-black text-pink-900">➕ 方式 A：單筆快速新增／更新學生</p>
+              <button type="button" onclick="toggleBatchImportPanel()"
+                class="candy-btn px-3.5 py-1.5 rounded-xl bg-sky-400 hover:bg-sky-500 text-white font-black text-xs shadow-[0_3px_0_0_#0284C7] cursor-pointer">
+                📋 展開「批次貼上匯入名單」▼
+              </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <div class="sm:w-28">
+                <input type="number" id="new-student-seat" min="1" max="60" placeholder="座號 (如 25)"
+                  class="w-full px-3.5 py-2.5 rounded-xl border-2 border-pink-300 bg-white font-black text-sm text-pink-700 focus:border-pink-500 outline-hidden" />
+              </div>
+              <div class="flex-1">
+                <input type="text" id="new-student-name" maxlength="15" placeholder="輸入學生姓名（例如：陳小樂）"
+                  class="w-full px-3.5 py-2.5 rounded-xl border-2 border-pink-300 bg-white font-bold text-sm text-slate-800 focus:border-pink-500 outline-hidden" />
+              </div>
+              <button type="button" onclick="addOrUpdateSingleStudent()"
+                class="candy-btn px-5 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-black text-sm shadow-[0_3px_0_0_#BE185D] cursor-pointer shrink-0">
+                ➕ 加入名單
+              </button>
+            </div>
+          </div>
+
+          <!-- 方式 B：批次貼上匯入（展開式區塊） -->
+          <div id="batch-import-panel" class="hidden p-4 rounded-2xl bg-sky-50 border-3 border-sky-300 space-y-3 animate-bounce-in">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm sm:text-base font-black text-sky-950">📋 方式 B：從 Excel / 試算表批次貼上匯入</h4>
+              <button type="button" onclick="toggleBatchImportPanel()" class="text-xs font-black text-sky-700 hover:text-sky-950 cursor-pointer">收起 ▲</button>
+            </div>
+            <p class="text-xs font-bold text-sky-800 leading-relaxed">
+              可直接複製 Excel 兩欄（座號＋姓名），或每行貼一個名字（自動編排 1, 2, 3... 號）：<br />
+              支援格式範例：<code class="bg-white px-1.5 py-0.5 rounded border border-sky-200">1 陳小樂</code>、<code class="bg-white px-1.5 py-0.5 rounded border border-sky-200">02,林小晴</code> 或純姓名換行。
+            </p>
+            <textarea id="batch-roster-textarea" rows="5"
+              placeholder="01 陳小樂&#10;02 林小晴&#10;03 王小宇&#10;（或直接貼上整排姓名，每行一位）"
+              class="w-full px-3.5 py-2.5 rounded-xl border-2 border-sky-300 bg-white font-bold text-sm text-slate-800 focus:border-sky-500 outline-hidden resize-y"></textarea>
+
+            <div class="flex flex-wrap items-center justify-end gap-2.5">
+              <button type="button" onclick="handleBatchImportRoster('merge')"
+                class="candy-btn px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-500 text-emerald-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#059669] cursor-pointer">
+                ➕ 合併新增至現有名單
+              </button>
+              <button type="button" onclick="handleBatchImportRoster('overwrite')"
+                class="candy-btn px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs sm:text-sm shadow-[0_3px_0_0_#0369A1] cursor-pointer">
+                🔄 覆蓋整份名單
+              </button>
+            </div>
+          </div>
+
+          <!-- 方式 C：名單列表直接編輯／刪除 -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <p class="text-xs sm:text-sm font-black text-slate-700">✏️ 方式 C：全班名單一覽（可直接改名或刪除）</p>
+              <span class="text-xs font-bold text-slate-400">依座號由小到大排列</span>
+            </div>
+
+            <div id="settings-roster-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[30rem] overflow-y-auto pr-1">
+              <!-- JS 動態渲染學生名單卡片 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側（5欄）：🌟 小幫手職務與名額管理 -->
+        <div class="lg:col-span-5 candy-card candy-border-mint p-5 sm:p-6 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-dashed border-emerald-200">
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-slate-800">🌟 小幫手職務與名額</h2>
+              <p class="text-xs font-bold text-slate-500">調整各幹部錄取人數或新增職務</p>
+            </div>
+            <span id="settings-total-quota-badge" class="px-3.5 py-1.5 rounded-full bg-emerald-100 border-2 border-emerald-300 text-emerald-900 font-black text-xs sm:text-sm self-start">
+              總名額：0 位
+            </span>
+          </div>
+
+          <!-- 新增職務表單 -->
+          <div class="p-4 rounded-2xl bg-emerald-50/80 border-2 border-emerald-200 space-y-3">
+            <p class="text-xs sm:text-sm font-black text-emerald-900">➕ 新增一個小幫手職務：</p>
+            <div class="grid grid-cols-12 gap-2.5">
+              <div class="col-span-4">
+                <label class="block text-[11px] font-black text-slate-600 mb-1">圖示</label>
+                <select id="new-role-emoji" class="w-full px-2.5 py-2 rounded-xl border-2 border-emerald-300 bg-white font-bold text-sm cursor-pointer">
+                  <option value="🎨">🎨 畫筆</option>
+                  <option value="🎵">🎵 音樂</option>
+                  <option value="📖">📖 閱讀</option>
+                  <option value="🪴">🪴 植物</option>
+                  <option value="🔔">🔔 鈴鐺</option>
+                  <option value="🧸">🧸 小熊</option>
+                  <option value="🩺">🩺 保健</option>
+                  <option value="💻">💻 電腦</option>
+                  <option value="⚽">⚽ 運動</option>
+                  <option value="🌈">🌈 彩虹</option>
+                </select>
+              </div>
+              <div class="col-span-5">
+                <label class="block text-[11px] font-black text-slate-600 mb-1">職務名稱</label>
+                <input type="text" id="new-role-name" maxlength="12" placeholder="如：保健小天使"
+                  class="w-full px-3 py-2 rounded-xl border-2 border-emerald-300 bg-white font-bold text-sm focus:border-emerald-500 outline-hidden" />
+              </div>
+              <div class="col-span-3">
+                <label class="block text-[11px] font-black text-slate-600 mb-1">名額</label>
+                <input type="number" id="new-role-quota" min="1" max="10" value="2"
+                  class="w-full px-2.5 py-2 rounded-xl border-2 border-emerald-300 bg-white font-bold text-sm focus:border-emerald-500 outline-hidden" />
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="new-role-desc" maxlength="30" placeholder="一句話工作小提示（如：陪同學去健康中心）"
+                class="flex-1 px-3 py-2 rounded-xl border-2 border-emerald-300 bg-white font-bold text-xs sm:text-sm focus:border-emerald-500 outline-hidden" />
+              <button type="button" onclick="addNewRole()"
+                class="candy-btn px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-500 text-emerald-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#059669] cursor-pointer shrink-0">
+                ✨ 新增
+              </button>
+            </div>
+          </div>
+
+          <!-- 現有職務列表 -->
+          <div id="settings-roles-list" class="space-y-2.5">
+            <!-- JS 動態渲染 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部全寬：📊 後台填報明細與資料整理中心 -->
+      <div class="candy-card candy-border-sky p-5 sm:p-6 space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b-2 border-dashed border-sky-200">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2">
+              <span>📊 後台填報明細與資料整理中心</span>
+            </h2>
+            <p class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">
+              老師可在這裡檢查每位小朋友的評分與志願、協助修改或刪除誤填資料，也能匯出 Excel 報表存檔！
+            </p>
+          </div>
+
+          <!-- 匯出與備份工具按鈕群 -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button type="button" onclick="exportFullSurveyCSV()"
+              class="candy-btn px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-500 border-2 border-emerald-500 text-emerald-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#059669] cursor-pointer flex items-center gap-1.5">
+              <span>📥 匯出完整填報 Excel (CSV)</span>
+            </button>
+            <button type="button" onclick="exportBackupJSON()"
+              class="candy-btn px-3.5 py-2.5 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-sky-300 text-sky-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#38BDF8] cursor-pointer flex items-center gap-1.5">
+              <span>💾 下載資料備份檔</span>
+            </button>
+            <button type="button" onclick="triggerImportBackupJSON()"
+              class="candy-btn px-3.5 py-2.5 rounded-2xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 text-amber-950 font-black text-xs sm:text-sm shadow-[0_3px_0_0_#FBBF24] cursor-pointer flex items-center gap-1.5">
+              <span>📂 還原備份檔</span>
+            </button>
+            <input type="file" id="input-import-backup" accept=".json" class="hidden" onchange="handleImportBackupJSON(event)" />
+          </div>
+        </div>
+
+        <!-- 篩選與搜尋列 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-sky-50/70 p-3.5 rounded-2xl border-2 border-sky-200">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs sm:text-sm font-black text-sky-950">篩選狀態：</span>
+            <select id="backend-filter-status" onchange="renderBackendSubmissionsTable()"
+              class="px-3 py-1.5 rounded-xl border-2 border-sky-300 bg-white font-black text-xs sm:text-sm text-slate-800 outline-hidden cursor-pointer">
+              <option value="all">全部名單（含已填與未填）</option>
+              <option value="submitted">✅ 只看已完成填寫</option>
+              <option value="unsubmitted">⏳ 只看尚未填寫</option>
+            </select>
+            <span id="backend-filter-count" class="text-xs font-black text-sky-700 bg-white px-2.5 py-1 rounded-full border border-sky-200">
+              顯示 0 筆
+            </span>
+          </div>
+
+          <div class="relative sm:w-64">
+            <input type="text" id="backend-search-input" oninput="renderBackendSubmissionsTable()"
+              placeholder="🔍 搜尋座號或學生姓名..."
+              class="w-full px-3.5 py-1.5 rounded-xl border-2 border-sky-300 bg-white font-bold text-xs sm:text-sm text-slate-800 focus:border-sky-500 outline-hidden" />
+          </div>
+        </div>
+
+        <!-- 全班填報明細資料表 -->
+        <div class="overflow-x-auto rounded-2xl border-2 border-sky-200">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-sky-100/80 text-sky-950 border-b-2 border-sky-200 font-black">
+                <th class="py-3 px-3.5 whitespace-nowrap">座號姓名</th>
+                <th class="py-3 px-3.5 whitespace-nowrap">狀態</th>
+                <th class="py-3 px-3.5 min-w-[180px]">志願排序（1～3志願）</th>
+                <th class="py-3 px-3.5 min-w-[200px]">給現任幹部評分明細</th>
+                <th class="py-3 px-3.5 min-w-[180px]">服務宣言 ／ 悄悄話</th>
+                <th class="py-3 px-3.5 text-right whitespace-nowrap">後台管理</th>
+              </tr>
+            </thead>
+            <tbody id="backend-submissions-tbody" class="divide-y-2 divide-slate-100 bg-white font-bold">
+              <!-- JS 動態渲染後台明細列 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="bg-white/90 border-t-4 border-amber-200 py-4 px-4 text-center text-xs sm:text-sm font-bold text-slate-500 mt-auto">
+    <p>🌈 班級小幫手（幹部）滿意度統計與志願智慧分發系統 · 專為國小中年級設計 🐻✨</p>
+  </footer>
+
+  <!-- 可愛漂浮通知 Toast 容器 -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- 魔法抽籤過場動畫遮罩 Modal -->
+  <div id="magic-lottery-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div class="candy-card candy-border-yellow p-8 max-w-sm w-full text-center space-y-4">
+      <div class="text-6xl animate-magic-flip inline-block">🎲</div>
+      <h3 class="text-2xl font-black text-slate-800">🪄 魔法小精靈抽籤中...</h3>
+      <p class="text-sm font-bold text-pink-600">正在幫大家轉動幸運號碼球，馬上揭曉喔！✨</p>
+    </div>
+  </div>
+
+  <!-- 送出心願單成功感謝視窗 Modal -->
+  <div id="thank-you-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="candy-card candy-border-pink p-6 sm:p-8 max-w-md w-full text-center space-y-4 animate-bounce-in">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-100 border-4 border-amber-300 flex items-center justify-center text-5xl shadow-inner">
+        🎉
+      </div>
+      <h3 id="thank-you-title" class="text-2xl font-black text-slate-800">太棒了！心願單已送出！</h3>
+      <p id="thank-you-desc" class="text-sm sm:text-base font-bold text-slate-600 leading-relaxed">
+        謝謝你的愛心星星與志願選擇，每一份鼓勵都讓班上變得更溫暖！🌈
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="button" onclick="closeThankYouModal(false)"
+          class="candy-btn flex-1 px-4 py-3 rounded-2xl bg-pink-500 text-white font-black text-sm shadow-[0_4px_0_0_#BE185D] cursor-pointer">
+          ✏️ 換下一位同學填寫
+        </button>
+        <button type="button" onclick="closeThankYouModal(true)"
+          class="candy-btn flex-1 px-4 py-3 rounded-2xl bg-amber-300 text-amber-950 font-black text-sm shadow-[0_4px_0_0_#D97706] cursor-pointer">
+          🏆 去看班級榮譽榜
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自訂確認對話框 Modal（絕不使用原生 confirm / alert） -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="candy-card candy-border-yellow p-6 max-w-md w-full animate-bounce-in">
+      <div class="flex items-start gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-2xl flex items-center justify-center shrink-0">
+          🐻
+        </div>
+        <div class="flex-1">
+          <h3 id="modal-title" class="text-lg font-black text-slate-800">小提醒</h3>
+          <p id="modal-message" class="text-sm font-bold text-slate-600 mt-1.5 leading-relaxed">確定要執行這個動作嗎？</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 mt-6">
+        <button type="button" onclick="closeConfirmModal()"
+          class="candy-btn px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm cursor-pointer">
+          先不要
+        </button>
+        <button type="button" id="modal-confirm-btn"
+          class="candy-btn px-5 py-2 rounded-xl bg-pink-500 text-white font-black text-sm shadow-[0_3px_0_0_#BE185D] cursor-pointer">
+          確定！
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Firebase v11.6.1 模組化即時連線引擎                        -->
+  <!-- ========================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      deleteDoc,
+      collection,
+      onSnapshot,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const DEFAULT_APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'class-helper-live-v1';
+
+    let fbApp = null;
+    let fbAuth = null;
+    let fbDb = null;
+    let currentUser = null;
+    let unsubRoomListener = null;
+    let unsubSubsListener = null;
+
+    /**
+     * 清除舊有即時監聽器
+     */
+    function cleanupListeners() {
+      if (typeof unsubRoomListener === 'function') {
+        unsubRoomListener();
+        unsubRoomListener = null;
+      }
+      if (typeof unsubSubsListener === 'function') {
+        unsubSubsListener();
+        unsubSubsListener = null;
+      }
+    }
+
+    /**
+     * 建立並啟動 Firebase 匿名／自訂權杖驗證與雙向即時監聽
+     */
+    async function connect(configObj, roomCode, options = {}) {
+      const { isStudentLink = false, onRoomData, onSubmissionsData, onStatusChange, onError } = options;
+      cleanupListeners();
+
+      try {
+        const instanceName = 'class-helper-' + Date.now();
+        fbApp = initializeApp(configObj, instanceName);
+        fbAuth = getAuth(fbApp);
+        fbDb = getFirestore(fbApp);
+
+        // 僅當連線目標為內建沙盒專案時才使用 __initial_auth_token，外部自訂專案一律使用匿名登入避免 custom-token-mismatch
+        let isSandboxBuiltin = false;
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          try {
+            const builtinObj = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+            if (builtinObj && builtinObj.projectId && builtinObj.projectId === configObj.projectId) {
+              isSandboxBuiltin = true;
+            }
+          } catch (e) {}
+        }
+
+        if (isSandboxBuiltin && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          try {
+            await signInWithCustomToken(fbAuth, __initial_auth_token);
+          } catch (tokenErr) {
+            console.warn('Custom token 驗證略過，改用匿名登入：', tokenErr);
+            await signInAnonymously(fbAuth);
+          }
+        } else {
+          await signInAnonymously(fbAuth);
+        }
+        currentUser = fbAuth.currentUser;
+        if (!currentUser) {
+          throw new Error('Firebase 匿名驗證未取得使用者識別碼');
+        }
+
+        const safeRoom = String(roomCode).trim();
+        // RULE 1: 嚴格遵循 /artifacts/{appId}/public/data/{collectionName} 路徑規範
+        const roomDocRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_rooms', safeRoom);
+        const subsColRef = collection(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions');
+
+        // 若為老師端主動建立連線，且雲端尚無此教室設定，則將目前設定同步上傳作為初始教室資料
+        if (!isStudentLink) {
+          const existingSnap = await getDoc(roomDocRef);
+          if (!existingSnap.exists() && typeof options.getInitialRoomPayload === 'function') {
+            const initialPayload = options.getInitialRoomPayload();
+            await setDoc(roomDocRef, {
+              ...initialPayload,
+              updatedAt: Date.now()
+            });
+            // 若目前本機已有填報資料，也一併批次同步至雲端
+            if (Array.isArray(initialPayload.initialSubmissions) && initialPayload.initialSubmissions.length > 0) {
+              const batch = writeBatch(fbDb);
+              initialPayload.initialSubmissions.forEach(sub => {
+                const subDocRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions', `${safeRoom}_${sub.seatNo}`);
+                batch.set(subDocRef, { ...sub, roomCode: safeRoom });
+              });
+              await batch.commit();
+            }
+          }
+        }
+
+        // 監聽教室設定文件（班級名稱、全班名單、職務名額、抽籤結果）
+        unsubRoomListener = onSnapshot(
+          roomDocRef,
+          (docSnap) => {
+            if (docSnap.exists() && typeof onRoomData === 'function') {
+              onRoomData(docSnap.data());
+            }
+          },
+          (err) => {
+            console.error('教室設定即時監聽錯誤：', err);
+            if (typeof onError === 'function') onError(err);
+          }
+        );
+
+        // RULE 2: 單純監聽整個 collection，於前端記憶體依 roomCode 篩選與座號排序（不使用複合查詢）
+        unsubSubsListener = onSnapshot(
+          subsColRef,
+          (querySnap) => {
+            const matchedSubs = [];
+            querySnap.forEach((d) => {
+              const data = d.data();
+              if (data && data.roomCode === safeRoom) {
+                matchedSubs.push(data);
+              }
+            });
+            matchedSubs.sort((a, b) => Number(a.seatNo) - Number(b.seatNo));
+            if (typeof onSubmissionsData === 'function') {
+              onSubmissionsData(matchedSubs);
+            }
+          },
+          (err) => {
+            console.error('填報資料即時監聽錯誤：', err);
+            if (typeof onError === 'function') onError(err);
+          }
+        );
+
+        if (typeof onStatusChange === 'function') {
+          onStatusChange({
+            connected: true,
+            roomCode: safeRoom,
+            uid: currentUser.uid,
+            config: configObj
+          });
+        }
+        return true;
+      } catch (err) {
+        console.error('Firebase 連線失敗：', err);
+        cleanupListeners();
+        currentUser = null;
+        if (typeof onError === 'function') onError(err);
+        return false;
+      }
+    }
+
+    /**
+     * 同步教室設定（班級名稱、名單、職務、分發結果）至 Firestore
+     */
+    async function saveRoomSettings(roomCode, payload) {
+      if (!currentUser || !fbDb || !roomCode) return;
+      const roomDocRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_rooms', String(roomCode));
+      await setDoc(roomDocRef, {
+        className: payload.className,
+        roster: payload.roster,
+        roles: payload.roles,
+        lastDistribution: payload.lastDistribution || null,
+        updatedAt: Date.now()
+      }, { merge: true });
+    }
+
+    /**
+     * 新增或更新單一學生的填報紀錄至 Firestore
+     */
+    async function saveSubmission(roomCode, subObj) {
+      if (!currentUser || !fbDb || !roomCode) return;
+      const safeRoom = String(roomCode);
+      const subDocRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions', `${safeRoom}_${subObj.seatNo}`);
+      await setDoc(subDocRef, {
+        ...subObj,
+        roomCode: safeRoom
+      });
+    }
+
+    /**
+     * 刪除單一學生的填報紀錄
+     */
+    async function deleteSubmission(roomCode, seatNo) {
+      if (!currentUser || !fbDb || !roomCode) return;
+      const safeRoom = String(roomCode);
+      const subDocRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions', `${safeRoom}_${seatNo}`);
+      await deleteDoc(subDocRef);
+    }
+
+    /**
+     * 批次覆蓋或清空該教室所有填報紀錄（用於載入模擬資料、還原備份或全部清空）
+     */
+    async function replaceAllSubmissions(roomCode, newSubmissionsList, existingSeatNos = []) {
+      if (!currentUser || !fbDb || !roomCode) return;
+      const safeRoom = String(roomCode);
+      const batch = writeBatch(fbDb);
+
+      const newSeatSet = new Set(newSubmissionsList.map(s => Number(s.seatNo)));
+      existingSeatNos.forEach(seat => {
+        if (!newSeatSet.has(Number(seat))) {
+          const delRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions', `${safeRoom}_${seat}`);
+          batch.delete(delRef);
+        }
+      });
+
+      newSubmissionsList.forEach(sub => {
+        const setRef = doc(fbDb, 'artifacts', DEFAULT_APP_ID, 'public', 'data', 'class_submissions', `${safeRoom}_${sub.seatNo}`);
+        batch.set(setRef, {
+          ...sub,
+          roomCode: safeRoom
+        });
+      });
+
+      await batch.commit();
+    }
+
+    /**
+     * 中斷雲端即時連線
+     */
+    function disconnect() {
+      cleanupListeners();
+      currentUser = null;
+      fbDb = null;
+      fbAuth = null;
+    }
+
+    window.FirebaseSyncEngine = {
+      connect,
+      saveRoomSettings,
+      saveSubmission,
+      deleteSubmission,
+      replaceAllSubmissions,
+      disconnect,
+      hasBuiltinConfig: () => typeof __firebase_config !== 'undefined' && Boolean(__firebase_config),
+      getBuiltinConfig: () => {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) return null;
+        return typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+      }
+    };
+  </script>
+
+  <!-- ========================================================= -->
+  <!-- 核心邏輯腳本                                              -->
+  <!-- ========================================================= -->
+  <script>
+    /**
+     * 老師專屬內建 Firebase 設定（專案：dhes-115-304）
+     */
+    const USER_EMBEDDED_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCHw4boFDK4pNSaXlgjq4zs0JFLJaQhckY",
+      authDomain: "dhes-115-304.firebaseapp.com",
+      projectId: "dhes-115-304",
+      storageBucket: "dhes-115-304.firebasestorage.app",
+      messagingSenderId: "301550129564",
+      appId: "1:301550129564:web:6cc889077cab5cc1393859"
+    };
+
+    const DEFAULT_CLASS_ROOM_CODE = '304';
+
+    /**
+     * 預設國小中年級班級學生名單（01～24 號，老師可於「老師魔法箱」一鍵覆蓋為實際全班名單）
+     */
+    const DEFAULT_ROSTER = [
+      { seatNo: 1, name: '陳小樂' },
+      { seatNo: 2, name: '林小晴' },
+      { seatNo: 3, name: '王小宇' },
+      { seatNo: 4, name: '張小涵' },
+      { seatNo: 5, name: '李小軒' },
+      { seatNo: 6, name: '黃小恩' },
+      { seatNo: 7, name: '吳小彤' },
+      { seatNo: 8, name: '劉小凱' },
+      { seatNo: 9, name: '蔡小妍' },
+      { seatNo: 10, name: '楊小豪' },
+      { seatNo: 11, name: '許小甯' },
+      { seatNo: 12, name: '鄭小誠' },
+      { seatNo: 13, name: '謝小妤' },
+      { seatNo: 14, name: '郭小叡' },
+      { seatNo: 15, name: '洪小希' },
+      { seatNo: 16, name: '邱小哲' },
+      { seatNo: 17, name: '曾小菲' },
+      { seatNo: 18, name: '廖小翔' },
+      { seatNo: 19, name: '賴小晴' },
+      { seatNo: 20, name: '徐小宥' },
+      { seatNo: 21, name: '周小芯' },
+      { seatNo: 22, name: '葉小辰' },
+      { seatNo: 23, name: '蘇小棠' },
+      { seatNo: 24, name: '呂小謙' }
+    ];
+
+    /**
+     * 預設國小中年級班級小幫手職務與名額
+     */
+    const DEFAULT_ROLES = [
+      { id: 'role_leader', emoji: '👑', name: '班長', quota: 1, desc: '帶領全班喊口令、維持教室秩序的小隊長' },
+      { id: 'role_vice', emoji: '🌟', name: '副班長', quota: 1, desc: '幫忙點名、協助班長處理班上大小事' },
+      { id: 'role_hygiene', emoji: '🧹', name: '衛生股長', quota: 2, desc: '帶領大家打掃教室、檢查整潔的小達人' },
+      { id: 'role_study', emoji: '📚', name: '學藝股長', quota: 2, desc: '收發作業簿本、佈置教室公佈欄的小幫手' },
+      { id: 'role_pe', emoji: '🏃', name: '體育股長', quota: 2, desc: '帶大家排隊做暖身操、借還球具的運動王' },
+      { id: 'role_lunch', emoji: '🍱', name: '午餐小幫手', quota: 3, desc: '幫忙抬餐桶、提醒大家洗手與打菜的小天使' },
+      { id: 'role_eco', emoji: '🌿', name: '環保小尖兵', quota: 2, desc: '檢查資源回收分類、隨手關燈愛地球' }
+    ];
+
+    /**
+     * 範例模擬填報資料（供單機體驗或老師測試使用）
+     */
+    const MOCK_STUDENTS_POOL = [
+      {
+        seatNo: 1,
+        name: '陳小樂',
+        ratings: { role_leader: 5, role_vice: 5, role_hygiene: 4, role_study: 5, role_pe: 5, role_lunch: 4, role_eco: 5 },
+        feedback: '謝謝班長和副班長每天提醒大家排隊安靜，大家都進步很多！',
+        choices: ['role_pe', 'role_leader', 'role_lunch'],
+        pitch: '我每天都很準時，會認真把任務做好！',
+        updatedAt: '範例資料'
+      },
+      {
+        seatNo: 2,
+        name: '林小晴',
+        ratings: { role_leader: 5, role_vice: 4, role_hygiene: 5, role_study: 5, role_pe: 4, role_lunch: 5, role_eco: 5 },
+        feedback: '衛生股長檢查掃地好仔細，教室每天都亮晶晶的！',
+        choices: ['role_study', 'role_vice', 'role_eco'],
+        pitch: '我很喜歡幫忙老師和同學，大家有需要都可以找我！',
+        updatedAt: '範例資料'
+      },
+      {
+        seatNo: 3,
+        name: '王小宇',
+        ratings: { role_leader: 4, role_vice: 5, role_hygiene: 4, role_study: 4, role_pe: 5, role_lunch: 5, role_eco: 4 },
+        feedback: '午餐小幫手每天抬餐桶辛苦了，謝謝你們！',
+        choices: ['role_lunch', 'role_pe', 'role_hygiene'],
+        pitch: '我力氣很大又很小心，會把午餐安全抬回教室！',
+        updatedAt: '範例資料'
+      },
+      {
+        seatNo: 4,
+        name: '張小涵',
+        ratings: { role_leader: 5, role_vice: 5, role_hygiene: 5, role_study: 5, role_pe: 4, role_lunch: 4, role_eco: 5 },
+        feedback: '',
+        choices: ['role_eco', 'role_study', 'role_hygiene'],
+        pitch: '我會細心檢查每一件事，讓班上變得更整齊乾淨！',
+        updatedAt: '範例資料'
+      }
+    ];
+
+    /**
+     * 全域應用程式狀態
+     */
+    let appState = {
+      className: '三年4班',
+      roster: [],
+      roles: [],
+      submissions: [],
+      lastDistribution: null,
+      activeTab: 'form',
+      formRatings: {},
+      editingSeatNo: null
+    };
+
+    let confirmModalCallback = null;
+
+    /**
+     * 雲端即時連線狀態物件（不使用 localStorage，資料由記憶體與 Firestore 即時同步）
+     */
+    let cloudState = {
+      connected: false,
+      roomCode: '',
+      uid: '',
+      config: null
+    };
+
+    /**
+     * 工具函式：座號補零（如 1 -> "01"）
+     */
+    function formatSeatNo(num) {
+      return String(num).padStart(2, '0');
+    }
+
+    /**
+     * 工具函式：HTML 安全跳脫防止 XSS
+     */
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * 工具函式：取得目前時間標籤
+     */
+    function getNowTimeLabel() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      return `${now.getMonth() + 1}/${now.getDate()} ${hh}:${mm}`;
+    }
+
+    /**
+     * 更新頂部導覽列全班人數、已填人數、總名額與班級徽章
+     */
+    function updateGlobalHeaderStats() {
+      const badgeEl = document.getElementById('header-class-badge');
+      const rosterEl = document.getElementById('header-roster-count');
+      const subEl = document.getElementById('header-submission-count');
+      const quotaEl = document.getElementById('header-quota-count');
+
+      if (badgeEl) badgeEl.textContent = `🏫 ${appState.className}`;
+      if (rosterEl) rosterEl.textContent = appState.roster.length;
+      if (subEl) subEl.textContent = appState.submissions.length;
+
+      const totalQuota = appState.roles.reduce((sum, r) => sum + (Number(r.quota) || 0), 0);
+      if (quotaEl) quotaEl.textContent = totalQuota;
+    }
+
+    /**
+     * 若目前處於雲端即時連線狀態，將班級名稱、名單、職務與抽籤結果同步儲存至 Firestore
+     */
+    function syncRoomToCloudIfConnected() {
+      if (cloudState.connected && window.FirebaseSyncEngine) {
+        window.FirebaseSyncEngine.saveRoomSettings(cloudState.roomCode, {
+          className: appState.className,
+          roster: appState.roster,
+          roles: appState.roles,
+          lastDistribution: appState.lastDistribution
+        }).catch(err => {
+          console.error('同步教室設定至雲端失敗：', err);
+        });
+      }
+    }
+
+    /**
+     * 解析老師貼上的 firebaseConfig 文字（支援標準 JSON 或 JS 程式碼片段）
+     */
+    function parseFirebaseConfigText(rawText) {
+      if (!rawText || typeof rawText !== 'string') return null;
+      const startIdx = rawText.indexOf('{');
+      const endIdx = rawText.lastIndexOf('}');
+      if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
+
+      const objStr = rawText.slice(startIdx, endIdx + 1);
+      try {
+        const parsed = JSON.parse(objStr);
+        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+      } catch (e) {
+        try {
+          const jsonified = objStr
+            .replace(/\/\/.*$/gm, '')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
+            .replace(/'/g, '"')
+            .replace(/,\s*}/g, '}');
+          const parsed2 = JSON.parse(jsonified);
+          if (parsed2 && parsed2.apiKey && parsed2.projectId) return parsed2;
+        } catch (e2) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * 產生隨機班級連線代碼
+     */
+    function generateRandomRoomCode() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      const roomInput = document.getElementById('input-room-code');
+      if (roomInput) {
+        roomInput.value = `304-${num}`;
+      }
+    }
+
+    /**
+     * 更新全站雲端連線狀態 UI 徽章與分享網址
+     */
+    function updateCloudSyncUI() {
+      const dotEl = document.getElementById('header-cloud-dot');
+      const textEl = document.getElementById('header-cloud-text');
+      const btnEl = document.getElementById('header-cloud-status-btn');
+      const panelBadge = document.getElementById('cloud-panel-badge');
+      const setupForm = document.getElementById('cloud-setup-form');
+      const connectedPanel = document.getElementById('cloud-connected-panel');
+
+      if (cloudState.connected) {
+        if (dotEl) dotEl.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block';
+        if (textEl) textEl.textContent = `雲端即時連線中｜代碼：${cloudState.roomCode}`;
+        if (btnEl) {
+          btnEl.className = 'candy-btn px-3 py-1.5 rounded-2xl bg-emerald-100 border-2 border-emerald-400 text-emerald-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_3px_0_0_#059669] cursor-pointer';
+        }
+        if (panelBadge) {
+          panelBadge.textContent = `🟢 已連線至教室：${cloudState.roomCode}`;
+          panelBadge.className = 'px-3.5 py-1.5 rounded-full bg-emerald-100 border-2 border-emerald-400 text-emerald-900 font-black text-xs sm:text-sm self-start';
+        }
+        if (setupForm) setupForm.classList.add('hidden');
+        if (connectedPanel) connectedPanel.classList.remove('hidden');
+
+        const codeDisplay = document.getElementById('connected-room-code-display');
+        const uidDisplay = document.getElementById('connected-user-uid-display');
+        const sharePreview = document.getElementById('student-share-url-preview');
+
+        if (codeDisplay) codeDisplay.textContent = cloudState.roomCode;
+        if (uidDisplay) uidDisplay.textContent = cloudState.uid;
+        if (sharePreview) sharePreview.value = buildStudentShareUrl();
+      } else {
+        if (dotEl) dotEl.className = 'w-2.5 h-2.5 rounded-full bg-slate-400 inline-block';
+        if (textEl) textEl.textContent = '單機模式（點此連線）';
+        if (btnEl) {
+          btnEl.className = 'candy-btn px-3 py-1.5 rounded-2xl bg-slate-100 border-2 border-slate-300 text-slate-700 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_3px_0_0_#94A3B8] cursor-pointer';
+        }
+        if (panelBadge) {
+          panelBadge.textContent = '⚪ 目前為單機模式';
+          panelBadge.className = 'px-3.5 py-1.5 rounded-full bg-slate-100 border-2 border-slate-300 text-slate-700 font-black text-xs sm:text-sm self-start';
+        }
+        if (setupForm) setupForm.classList.remove('hidden');
+        if (connectedPanel) connectedPanel.classList.add('hidden');
+      }
+    }
+
+    /**
+     * 組合包含 Firebase 設定與班級代碼的學生專屬分享網址
+     */
+    function buildStudentShareUrl() {
+      const baseUrl = window.location.href.split('#')[0];
+      if (!cloudState.connected || !cloudState.config) return baseUrl;
+      const encodedFb = btoa(JSON.stringify(cloudState.config));
+      const encodedRoom = encodeURIComponent(cloudState.roomCode);
+      return `${baseUrl}#room=${encodedRoom}&fb=${encodeURIComponent(encodedFb)}`;
+    }
+
+    /**
+     * 複製學生專屬連線網址
+     */
+    function copyStudentShareLink() {
+      const url = buildStudentShareUrl();
+      copyTextToClipboard(url, '🔗 已複製學生專屬連線網址！貼到班級群組或平板即可多人同步填寫！');
+    }
+
+    /**
+     * 啟動雲端連線共用邏輯
+     */
+    async function startCloudConnection(configObj, roomCode, isStudentLink = false) {
+      if (!window.FirebaseSyncEngine) {
+        showToast('⚠️ Firebase 模組尚未載入完成，請稍候再試！', 'error');
+        return;
+      }
+
+      showToast('☁️ 正在連線至 Firebase 雲端教室...', 'info');
+      const ok = await window.FirebaseSyncEngine.connect(configObj, roomCode, {
+        isStudentLink,
+        getInitialRoomPayload: () => ({
+          className: appState.className,
+          roster: appState.roster,
+          roles: appState.roles,
+          lastDistribution: appState.lastDistribution,
+          initialSubmissions: appState.submissions
+        }),
+        onStatusChange: (status) => {
+          cloudState = {
+            connected: status.connected,
+            roomCode: status.roomCode,
+            uid: status.uid,
+            config: status.config
+          };
+          // 將連線資訊寫入網址 Hash，方便重新整理時自動保持連線
+          try {
+            const encodedFb = btoa(JSON.stringify(status.config));
+            window.history.replaceState(null, '', `#room=${encodeURIComponent(status.roomCode)}&fb=${encodeURIComponent(encodedFb)}`);
+          } catch (e) {}
+          updateCloudSyncUI();
+          showToast(`🟢 已成功連線至雲端教室「${status.roomCode}」！`, 'success');
+        },
+        onRoomData: (roomData) => {
+          if (roomData.className) appState.className = roomData.className;
+          if (Array.isArray(roomData.roster)) {
+            appState.roster = roomData.roster.sort((a, b) => a.seatNo - b.seatNo);
+          }
+          if (Array.isArray(roomData.roles)) {
+            appState.roles = roomData.roles;
+          }
+          if (roomData.lastDistribution !== undefined) {
+            appState.lastDistribution = roomData.lastDistribution;
+          }
+          updateGlobalHeaderStats();
+          refreshCurrentActiveView();
+        },
+        onSubmissionsData: (liveSubs) => {
+          appState.submissions = liveSubs;
+          updateGlobalHeaderStats();
+          refreshCurrentActiveView();
+        },
+        onError: (err) => {
+          if (err && (err.code === 'auth/operation-not-allowed' || err.code === 'auth/admin-restricted-operation')) {
+            showToast('⚠️ 請到 Firebase 控制台 → Authentication → Sign-in method 開啟「匿名 (Anonymous)」登入喔！', 'error');
+          } else {
+            showToast(`⚠️ 雲端連線異常：${err.message || '請確認 Firebase 匿名登入與 Firestore 規則已開啟'}`, 'error');
+          }
+        }
+      });
+
+      if (!ok) {
+        cloudState.connected = false;
+        updateCloudSyncUI();
+      }
+    }
+
+    /**
+     * 老師端按下「啟動雲端多人即時連線」
+     */
+    function handleTeacherConnectFirebase() {
+      const rawConfig = document.getElementById('input-firebase-config')?.value || '';
+      const roomCode = (document.getElementById('input-room-code')?.value || '').trim();
+
+      const parsedConfig = parseFirebaseConfigText(rawConfig);
+      if (!parsedConfig) {
+        showToast('⚠️ 無法辨識 firebaseConfig，請確認已完整貼上包含 apiKey 與 projectId 的設定！', 'error');
+        return;
+      }
+      if (!roomCode) {
+        showToast('🏫 請輸入班級連線代碼（例如：3A-8821）！', 'error');
+        return;
+      }
+
+      startCloudConnection(parsedConfig, roomCode, false);
+    }
+
+    /**
+     * 使用環境內建 Firebase 一鍵連線
+     */
+    function connectWithBuiltinFirebase() {
+      const builtinConfig = window.FirebaseSyncEngine?.getBuiltinConfig();
+      const roomCode = (document.getElementById('input-room-code')?.value || '').trim() || '3A-8821';
+      if (!builtinConfig) return;
+      startCloudConnection(builtinConfig, roomCode, false);
+    }
+
+    /**
+     * 中斷雲端連線
+     */
+    function disconnectCloudSync() {
+      if (window.FirebaseSyncEngine) {
+        window.FirebaseSyncEngine.disconnect();
+      }
+      cloudState = { connected: false, roomCode: '', uid: '', config: null };
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      updateCloudSyncUI();
+      showToast('🔌 已中斷雲端連線，切換回單機模式', 'info');
+    }
+
+    /**
+     * 檢查網址 Hash 是否帶有分享連線參數，若有則自動連線（學生端開啟連結時觸發）
+     */
+    function tryAutoConnectFromUrlHash() {
+      const hash = window.location.hash;
+      if (!hash || hash.length < 5) return false;
+
+      const params = new URLSearchParams(hash.slice(1));
+      const roomParam = params.get('room');
+      const fbParam = params.get('fb');
+
+      if (roomParam && fbParam) {
+        try {
+          const decodedConfig = JSON.parse(atob(decodeURIComponent(fbParam)));
+          const decodedRoom = decodeURIComponent(roomParam);
+          const cfgInput = document.getElementById('input-firebase-config');
+          const roomInput = document.getElementById('input-room-code');
+          if (cfgInput) cfgInput.value = JSON.stringify(decodedConfig, null, 2);
+          if (roomInput) roomInput.value = decodedRoom;
+
+          // 學生端透過連結進入時，清空本機預設模擬資料等待雲端教室資料推播
+          appState.submissions = [];
+          startCloudConnection(decodedConfig, decodedRoom, true);
+          return true;
+        } catch (e) {
+          console.error('解析分享網址參數失敗：', e);
+        }
+      }
+      return false;
+    }
+
+    /**
+     * 即時刷新目前所在分頁的畫面
+     */
+    function refreshCurrentActiveView() {
+      if (appState.activeTab === 'form') {
+        renderStudentDropdown();
+        renderRatingCards();
+        populateChoiceDropdowns();
+      } else if (appState.activeTab === 'dashboard') {
+        renderDashboard();
+      } else if (appState.activeTab === 'distribution') {
+        renderDistributionView();
+      } else if (appState.activeTab === 'settings') {
+        renderSettings();
+      }
+    }
+
+    /**
+     * 取得星等對應童趣評語與徽章樣式
+     */
+    function getKidRatingLabel(score) {
+      const map = {
+        0: { text: '還沒打分數喔 ⭐', badgeClass: 'bg-slate-100 text-slate-500 border-slate-200' },
+        1: { text: '還要再加油 💪', badgeClass: 'bg-sky-100 text-sky-800 border-sky-300' },
+        2: { text: '有進步空間 🌱', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+        3: { text: '表現不錯喔 👍', badgeClass: 'bg-amber-100 text-amber-800 border-amber-300' },
+        4: { text: '超級棒的啦 🌟', badgeClass: 'bg-orange-100 text-orange-800 border-orange-300' },
+        5: { text: '宇宙無敵讚 🎉', badgeClass: 'bg-pink-100 text-pink-700 border-pink-300' }
+      };
+      return map[score] || map[0];
+    }
+
+    /**
+     * 快速填入服務宣言範例句
+     */
+    function applyPitchSuggestion(text) {
+      const inputEl = document.getElementById('input-pitch');
+      if (!inputEl) return;
+      inputEl.value = text;
+      inputEl.focus();
+    }
+
+    /**
+     * 自動捲動並閃爍提醒尚未評分的幹部卡片
+     */
+    function highlightUnratedRoleCard(roleId) {
+      const roleIndex = appState.roles.findIndex(r => r.id === roleId);
+      const container = document.getElementById('form-ratings-container');
+      if (roleIndex === -1 || !container || !container.children[roleIndex]) return;
+
+      const cardEl = container.children[roleIndex];
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      cardEl.classList.add('ring-4', 'ring-pink-500', 'unrated-flash');
+      setTimeout(() => {
+        cardEl.classList.remove('ring-4', 'ring-pink-500', 'unrated-flash');
+      }, 2200);
+    }
+
+    /**
+     * 渲染學生下拉選單（01 號 － 姓名，標示是否已填過）
+     */
+    function renderStudentDropdown() {
+      const selectEl = document.getElementById('select-student');
+      const progressHintEl = document.getElementById('form-progress-hint');
+      if (!selectEl) return;
+
+      const currentVal = selectEl.value;
+      const submittedSeatSet = new Set(appState.submissions.map(s => s.seatNo));
+
+      let optionsHtml = '<option value="">👇 請點這裡選擇你的座號和名字 👇</option>';
+      appState.roster.forEach(student => {
+        const isDone = submittedSeatSet.has(student.seatNo);
+        const label = `${formatSeatNo(student.seatNo)} 號 － ${escapeHtml(student.name)}${isDone ? ' （✅ 已填過囉！）' : ''}`;
+        optionsHtml += `<option value="${student.seatNo}">${label}</option>`;
+      });
+      selectEl.innerHTML = optionsHtml;
+
+      if (currentVal && appState.roster.some(s => String(s.seatNo) === String(currentVal))) {
+        selectEl.value = currentVal;
+      }
+
+      if (progressHintEl) {
+        progressHintEl.textContent = `目前全班已有 ${appState.submissions.length} / ${appState.roster.length} 位同學完成`;
+      }
+    }
+
+    /**
+     * 當學生從下拉選單點選自己時觸發
+     */
+    function handleStudentSelectChange() {
+      const selectEl = document.getElementById('select-student');
+      const welcomeCard = document.getElementById('selected-student-welcome');
+      const welcomeText = document.getElementById('selected-student-welcome-text');
+      const existingAlert = document.getElementById('existing-submission-alert');
+      const existingText = document.getElementById('existing-submission-text');
+      const loadBtn = document.getElementById('btn-load-existing');
+      const selectErr = document.getElementById('student-select-error');
+
+      if (selectErr) selectErr.classList.add('hidden');
+
+      const seatNo = Number(selectEl.value);
+      if (!seatNo) {
+        welcomeCard.classList.add('hidden');
+        existingAlert.classList.add('hidden');
+        return;
+      }
+
+      const student = appState.roster.find(s => s.seatNo === seatNo);
+      if (!student) return;
+
+      welcomeText.textContent = `嗨！${formatSeatNo(student.seatNo)} 號 ${student.name}，歡迎來當小評審與許願小天使 ✨`;
+      welcomeCard.classList.remove('hidden');
+
+      const existingSub = appState.submissions.find(s => s.seatNo === seatNo);
+      if (existingSub) {
+        existingText.textContent = `${student.name}，你之前（${existingSub.updatedAt || '稍早'}）已經送出過心願單囉！如果想修改星星或志願，可以點右邊按鈕載入原本的內容喔～`;
+        existingAlert.classList.remove('hidden');
+        loadBtn.onclick = () => loadExistingSubmissionIntoForm(existingSub);
+      } else {
+        existingAlert.classList.add('hidden');
+      }
+    }
+
+    /**
+     * 載入該生原本送出的紀錄到表單以供修改
+     */
+    function loadExistingSubmissionIntoForm(sub) {
+      appState.formRatings = { ...(sub.ratings || {}) };
+      renderRatingCards();
+
+      document.getElementById('input-feedback').value = sub.feedback || '';
+      document.getElementById('input-pitch').value = sub.pitch || '';
+
+      const choices = sub.choices || [];
+      document.getElementById('select-choice-1').value = choices[0] || '';
+      document.getElementById('select-choice-2').value = choices[1] || '';
+      document.getElementById('select-choice-3').value = choices[2] || '';
+      handleChoiceChange();
+
+      document.getElementById('existing-submission-alert').classList.add('hidden');
+      showToast(`📥 已載入 ${sub.name} 原本填寫的內容，修改後再按送出就可以囉！`, 'info');
+    }
+
+    /**
+     * 渲染步驟二的各幹部星等評分卡片
+     */
+    function renderRatingCards() {
+      const container = document.getElementById('form-ratings-container');
+      if (!container) return;
+
+      if (appState.roles.length === 0) {
+        container.innerHTML = '<p class="text-sm font-bold text-slate-500 col-span-full text-center py-6">老師尚未設定小幫手職務喔！</p>';
+        return;
+      }
+
+      container.innerHTML = appState.roles.map(role => {
+        const currentScore = appState.formRatings[role.id] || 0;
+        const labelInfo = getKidRatingLabel(currentScore);
+
+        let starsHtml = '';
+        for (let star = 1; star <= 5; star++) {
+          const isLit = star <= currentScore;
+          starsHtml += `
+            <button type="button" onclick="setStarRating('${role.id}', ${star}, this)"
+              aria-label="給 ${escapeHtml(role.name)} ${star} 顆星"
+              class="star-btn text-3xl sm:text-4xl leading-none cursor-pointer focus:outline-hidden ${isLit ? 'text-amber-400' : 'text-slate-200 hover:text-amber-200'}">
+              ★
+            </button>
+          `;
+        }
+
+        return `
+          <div class="p-4 rounded-2xl border-3 transition-all ${currentScore > 0 ? 'bg-amber-50/70 border-amber-300 shadow-[0_4px_0_0_#FBBF24]' : 'bg-slate-50/70 border-slate-200'}">
+            <div class="flex items-start justify-between gap-2 mb-2.5">
+              <div class="flex items-center gap-2.5">
+                <span class="w-11 h-11 rounded-2xl bg-white border-2 border-amber-200 flex items-center justify-center text-2xl shrink-0 shadow-xs">
+                  ${escapeHtml(role.emoji)}
+                </span>
+                <div>
+                  <h4 class="text-base sm:text-lg font-black text-slate-800">${escapeHtml(role.name)}</h4>
+                  <p class="text-xs font-bold text-slate-500 leading-snug">${escapeHtml(role.desc || '')}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t-2 border-dashed border-amber-200/70">
+              <div class="flex items-center gap-1" role="radiogroup" aria-label="${escapeHtml(role.name)} 評分">
+                ${starsHtml}
+              </div>
+              <span class="px-2.5 py-1 rounded-full border-2 text-xs font-black ${labelInfo.badgeClass}">
+                ${labelInfo.text}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 點擊星星設定分數並播放彈跳動畫
+     */
+    function setStarRating(roleId, score, btnEl) {
+      appState.formRatings[roleId] = score;
+      const errEl = document.getElementById('ratings-error');
+      if (errEl) errEl.classList.add('hidden');
+
+      renderRatingCards();
+
+      // 重新渲染後找到對應卡片的第 score 顆星加上彈跳動畫
+      const roleIdx = appState.roles.findIndex(r => r.id === roleId);
+      const container = document.getElementById('form-ratings-container');
+      if (roleIdx !== -1 && container && container.children[roleIdx]) {
+        const starBtns = container.children[roleIdx].querySelectorAll('.star-btn');
+        if (starBtns[score - 1]) {
+          starBtns[score - 1].classList.add('star-pop-anim');
+        }
+      }
+    }
+
+    /**
+     * 填充第一、二、三志願下拉選單並自動防止重複選取
+     */
+    function populateChoiceDropdowns() {
+      const ids = ['select-choice-1', 'select-choice-2', 'select-choice-3'];
+      const placeholders = [
+        '-- 點這裡選第一志願 --',
+        '-- 點這裡選第二志願 --',
+        '-- 點這裡選第三志願 --'
+      ];
+
+      const currentValues = ids.map(id => {
+        const el = document.getElementById(id);
+        return el ? el.value : '';
+      });
+
+      ids.forEach((id, idx) => {
+        const selectEl = document.getElementById(id);
+        if (!selectEl) return;
+
+        const selectedElsewhere = new Set(
+          currentValues.filter((val, otherIdx) => val && otherIdx !== idx)
+        );
+
+        let html = `<option value="">${placeholders[idx]}</option>`;
+        appState.roles.forEach(role => {
+          const isTaken = selectedElsewhere.has(role.id);
+          const quotaText = `（名額 ${role.quota} 位）`;
+          html += `<option value="${role.id}" ${isTaken ? 'disabled' : ''}>
+            ${escapeHtml(role.emoji)} ${escapeHtml(role.name)} ${quotaText}${isTaken ? ' － 已選過囉' : ''}
+          </option>`;
+        });
+
+        selectEl.innerHTML = html;
+        if (currentValues[idx] && appState.roles.some(r => r.id === currentValues[idx])) {
+          selectEl.value = currentValues[idx];
+        }
+      });
+    }
+
+    /**
+     * 志願選單變更時即時更新防重複狀態
+     */
+    function handleChoiceChange() {
+      const errEl = document.getElementById('choices-error');
+      if (errEl) errEl.classList.add('hidden');
+      populateChoiceDropdowns();
+    }
+
+    /**
+     * 重置學生填報表單（準備給下一位同學填寫）
+     */
+    function resetStudentForm() {
+      const formEl = document.getElementById('student-survey-form');
+      if (formEl) formEl.reset();
+
+      appState.formRatings = {};
+      document.getElementById('selected-student-welcome').classList.add('hidden');
+      document.getElementById('existing-submission-alert').classList.add('hidden');
+      document.getElementById('student-select-error').classList.add('hidden');
+      document.getElementById('ratings-error').classList.add('hidden');
+      document.getElementById('choices-error').classList.add('hidden');
+
+      renderStudentDropdown();
+      renderRatingCards();
+      populateChoiceDropdowns();
+    }
+
+    /**
+     * 處理學生送出心願單表單
+     */
+    function handleFormSubmit(e) {
+      e.preventDefault();
+
+      const selectEl = document.getElementById('select-student');
+      const selectErr = document.getElementById('student-select-error');
+      const ratingsErr = document.getElementById('ratings-error');
+      const choicesErr = document.getElementById('choices-error');
+
+      selectErr.classList.add('hidden');
+      ratingsErr.classList.add('hidden');
+      choicesErr.classList.add('hidden');
+
+      let isValid = true;
+
+      // 1. 驗證座號姓名
+      const seatNo = Number(selectEl.value);
+      const rosterStudent = appState.roster.find(s => s.seatNo === seatNo);
+      if (!seatNo || !rosterStudent) {
+        selectErr.textContent = '🎒 請先在下拉選單點選你的座號與姓名喔！';
+        selectErr.classList.remove('hidden');
+        isValid = false;
+      }
+
+      // 2. 驗證每位現任幹部都有親自評分（1~5星）
+      const unratedRoles = appState.roles.filter(r => !appState.formRatings[r.id] || appState.formRatings[r.id] < 1);
+      if (unratedRoles.length > 0) {
+        const firstUnrated = unratedRoles[0];
+        ratingsErr.textContent = unratedRoles.length === 1
+          ? `⭐ 別忘了幫「${firstUnrated.emoji} ${firstUnrated.name}」打分數喔！`
+          : `⭐ 別忘了幫「${firstUnrated.emoji} ${firstUnrated.name}」打分數喔！（還有 ${unratedRoles.length} 個小幫手還沒評分）`;
+        ratingsErr.classList.remove('hidden');
+        isValid = false;
+      }
+
+      // 3. 驗證三個志願且不可重複
+      const c1 = document.getElementById('select-choice-1').value;
+      const c2 = document.getElementById('select-choice-2').value;
+      const c3 = document.getElementById('select-choice-3').value;
+
+      if (!c1 || !c2 || !c3) {
+        choicesErr.textContent = '🎯 請把第一、第二、第三志願都選好喔！';
+        choicesErr.classList.remove('hidden');
+        isValid = false;
+      } else if (new Set([c1, c2, c3]).size !== 3) {
+        choicesErr.textContent = '🌈 三個志願要選不一樣的職務喔！';
+        choicesErr.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (!isValid) {
+        if (!seatNo || !rosterStudent) {
+          showToast('🎒 記得先在上面下拉選單點選你的座號和名字喔！', 'error');
+          selectEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (unratedRoles.length > 0) {
+          const firstUnrated = unratedRoles[0];
+          showToast(`別忘了幫「${firstUnrated.name}」打分數喔！⭐`, 'error');
+          highlightUnratedRoleCard(firstUnrated.id);
+        } else {
+          showToast('🎯 請把三個不一樣的志願都選好喔！', 'error');
+          document.getElementById('select-choice-1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      // 組合心願單資料物件
+      const feedbackText = document.getElementById('input-feedback').value.trim();
+      const pitchText = document.getElementById('input-pitch').value.trim();
+      const ratingsCopy = {};
+      appState.roles.forEach(r => {
+        ratingsCopy[r.id] = Number(appState.formRatings[r.id]);
+      });
+
+      const submissionObj = {
+        seatNo: rosterStudent.seatNo,
+        name: rosterStudent.name,
+        ratings: ratingsCopy,
+        feedback: feedbackText,
+        choices: [c1, c2, c3],
+        pitch: pitchText,
+        updatedAt: getNowTimeLabel()
+      };
+
+      const existingIdx = appState.submissions.findIndex(s => s.seatNo === rosterStudent.seatNo);
+      if (existingIdx !== -1) {
+        appState.submissions[existingIdx] = submissionObj;
+      } else {
+        appState.submissions.push(submissionObj);
+      }
+      appState.submissions.sort((a, b) => a.seatNo - b.seatNo);
+
+      if (cloudState.connected && window.FirebaseSyncEngine) {
+        window.FirebaseSyncEngine.saveSubmission(cloudState.roomCode, submissionObj).catch(err => {
+          console.error('送出心願單至雲端失敗：', err);
+          showToast('⚠️ 雲端同步發生小狀況，請稍後再試一次喔！', 'error');
+        });
+      }
+      updateGlobalHeaderStats();
+
+      // 播放五彩紙花並彈出感謝視窗
+      fireConfetti();
+      const firstRole = appState.roles.find(r => r.id === c1);
+      document.getElementById('thank-you-title').textContent = `太棒了！${rosterStudent.name} 的心願單已送出！`;
+      document.getElementById('thank-you-desc').textContent =
+        `你的第一志願是「${firstRole ? `${firstRole.emoji} ${firstRole.name}` : '班級小幫手'}」，謝謝你給現任幹部的愛心星星與鼓勵！🌈`;
+
+      const thankModal = document.getElementById('thank-you-modal');
+      thankModal.classList.remove('hidden');
+      thankModal.classList.add('flex');
+    }
+
+    /**
+     * 關閉送出成功視窗
+     */
+    function closeThankYouModal(goToDashboard) {
+      const thankModal = document.getElementById('thank-you-modal');
+      thankModal.classList.add('hidden');
+      thankModal.classList.remove('flex');
+      resetStudentForm();
+      if (goToDashboard) {
+        switchTab('dashboard');
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    /**
+     * 取得尚未填寫的學生名單陣列
+     */
+    function getUnsubmittedStudents() {
+      const submittedSet = new Set(appState.submissions.map(s => s.seatNo));
+      return appState.roster.filter(s => !submittedSet.has(s.seatNo));
+    }
+
+    /**
+     * 渲染分頁 2：🏆 班級榮譽榜（滿意度統計與悄悄話便利貼牆）
+     */
+    function renderDashboard() {
+      const totalRoster = appState.roster.length;
+      const totalResp = appState.submissions.length;
+
+      // 更新尚未填寫名單提示
+      const unsubmitted = getUnsubmittedStudents();
+      const unsubmittedHintEl = document.getElementById('dashboard-unsubmitted-hint');
+      if (unsubmittedHintEl) {
+        if (unsubmitted.length === 0) {
+          unsubmittedHintEl.textContent = '🎉 太棒了！全班小朋友都已經填寫完成囉！';
+        } else {
+          const previewList = unsubmitted.slice(0, 8).map(s => `${formatSeatNo(s.seatNo)}號${s.name}`).join('、');
+          const extra = unsubmitted.length > 8 ? ` 等共 ${unsubmitted.length} 人` : `（共 ${unsubmitted.length} 人）`;
+          unsubmittedHintEl.textContent = `⏳ 還沒填寫的小朋友：${previewList}${extra}`;
+        }
+      }
+
+      // 1. 完成人數
+      const respEl = document.getElementById('stat-total-responses');
+      const rosterSubEl = document.getElementById('stat-roster-total-sub');
+      if (respEl) respEl.textContent = totalResp;
+      if (rosterSubEl) rosterSubEl.textContent = `/ ${totalRoster} 人`;
+
+      // 計算各職務平均星等與星等分佈
+      const roleStats = appState.roles.map(role => {
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        let sum = 0;
+        let validVotes = 0;
+
+        appState.submissions.forEach(sub => {
+          const score = sub.ratings ? Number(sub.ratings[role.id]) : 0;
+          if (score >= 1 && score <= 5) {
+            counts[score]++;
+            sum += score;
+            validVotes++;
+          }
+        });
+
+        const avg = validVotes > 0 ? (sum / validVotes) : 0;
+        // 統計有多少人選此職務為第一志願
+        const firstChoiceDemand = appState.submissions.filter(s => s.choices && s.choices[0] === role.id).length;
+
+        return {
+          ...role,
+          avg,
+          validVotes,
+          counts,
+          firstChoiceDemand
+        };
+      });
+
+      // 2. 全班平均愛心星等
+      const validStats = roleStats.filter(r => r.validVotes > 0);
+      const overallAvg = validStats.length > 0
+        ? (validStats.reduce((acc, r) => acc + r.avg, 0) / validStats.length)
+        : 0;
+      const overallAvgEl = document.getElementById('stat-overall-avg');
+      if (overallAvgEl) overallAvgEl.textContent = overallAvg.toFixed(1);
+
+      // 3. 滿分人氣王幹部（平均星等最高）
+      const sortedByAvg = [...validStats].sort((a, b) => b.avg - a.avg);
+      const popRoleEl = document.getElementById('stat-popular-role');
+      const popScoreEl = document.getElementById('stat-popular-score');
+      if (sortedByAvg.length > 0) {
+        const top = sortedByAvg[0];
+        popRoleEl.textContent = `${top.emoji} ${top.name}`;
+        popScoreEl.textContent = `平均 ${top.avg.toFixed(1)} 顆星 ✨（${top.counts[5]} 人給 5 星）`;
+      } else {
+        popRoleEl.textContent = '--';
+        popScoreEl.textContent = '等待大家投票中';
+      }
+
+      // 4. 最佳服務小幫手（第一志願最熱門或第二高分幹部，全正向鼓勵）
+      const sortedByDemand = [...roleStats].sort((a, b) => b.firstChoiceDemand - a.firstChoiceDemand || b.avg - a.avg);
+      const serviceRoleEl = document.getElementById('stat-service-role');
+      const serviceScoreEl = document.getElementById('stat-service-score');
+      if (sortedByDemand.length > 0 && totalResp > 0) {
+        const hot = sortedByDemand[0];
+        serviceRoleEl.textContent = `${hot.emoji} ${hot.name}`;
+        serviceScoreEl.textContent = `有 ${hot.firstChoiceDemand} 位同學第一志願想當！`;
+      } else {
+        serviceRoleEl.textContent = '--';
+        serviceScoreEl.textContent = '每位幹部都超棒！';
+      }
+
+      // 排序各職務卡片
+      const sortMode = document.getElementById('dashboard-sort')?.value || 'default';
+      const displayStats = sortMode === 'score-desc'
+        ? [...roleStats].sort((a, b) => b.avg - a.avg)
+        : roleStats;
+
+      const rolesGrid = document.getElementById('dashboard-roles-grid');
+      if (rolesGrid) {
+        const borderColors = ['candy-border-pink', 'candy-border-yellow', 'candy-border-mint', 'candy-border-sky', 'candy-border-grape'];
+        rolesGrid.innerHTML = displayStats.map((stat, idx) => {
+          const borderClass = borderColors[idx % borderColors.length];
+          const pct = Math.min(100, Math.round((stat.avg / 5) * 100));
+
+          let barsHtml = '';
+          for (let star = 5; star >= 1; star--) {
+            const c = stat.counts[star];
+            const barPct = stat.validVotes > 0 ? Math.round((c / stat.validVotes) * 100) : 0;
+            barsHtml += `
+              <div class="flex items-center gap-2 text-xs font-bold">
+                <span class="w-10 text-amber-600 shrink-0">${star} ★</span>
+                <div class="flex-1 h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-amber-400 transition-all duration-500" style="width: ${barPct}%"></div>
+                </div>
+                <span class="w-8 text-right text-slate-500 shrink-0">${c}人</span>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="candy-card ${borderClass} p-5 flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">${escapeHtml(stat.emoji)}</span>
+                    <div>
+                      <h4 class="text-lg font-black text-slate-800">${escapeHtml(stat.name)}</h4>
+                      <span class="text-xs font-bold text-slate-400">名額 ${stat.quota} 位 · ${stat.firstChoiceDemand} 人首選</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-black text-amber-500">${stat.avg.toFixed(1)}</span>
+                    <span class="text-xs font-black text-amber-400">★</span>
+                  </div>
+                </div>
+
+                <!-- 總愛心進度條 -->
+                <div class="w-full h-3 rounded-full bg-amber-100 overflow-hidden mb-3">
+                  <div class="h-full rounded-full bg-gradient-to-r from-amber-300 via-pink-400 to-amber-500 transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+
+                <div class="space-y-1.5">
+                  ${barsHtml}
+                </div>
+              </div>
+
+              <div class="pt-2 border-t-2 border-dashed border-slate-100 flex items-center justify-between text-xs font-black text-pink-600">
+                <span>👏 感謝小幫手的辛苦服務！</span>
+                <span>共 ${stat.validVotes} 票</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 渲染班級悄悄話便利貼牆（不記名）
+      const feedbacks = appState.submissions
+        .filter(s => s.feedback && s.feedback.trim().length > 0)
+        .map(s => s.feedback.trim());
+
+      const countBadge = document.getElementById('feedback-count-badge');
+      if (countBadge) countBadge.textContent = `${feedbacks.length} 張便利貼`;
+
+      const wallEl = document.getElementById('anonymous-feedback-wall');
+      if (wallEl) {
+        if (feedbacks.length === 0) {
+          wallEl.innerHTML = `
+            <div class="col-span-full text-center py-8 text-slate-500 font-bold">
+              💌 目前還沒有悄悄話便利貼，快去「✏️ 小朋友填一填」寫下第一張暖心紙條吧！
+            </div>
+          `;
+        } else {
+          const noteStyles = [
+            { bg: 'bg-amber-100 border-amber-300 text-amber-950', rot: '-rotate-1' },
+            { bg: 'bg-pink-100 border-pink-300 text-pink-950', rot: 'rotate-1' },
+            { bg: 'bg-sky-100 border-sky-300 text-sky-950', rot: '-rotate-2' },
+            { bg: 'bg-emerald-100 border-emerald-300 text-emerald-950', rot: 'rotate-2' }
+          ];
+          wallEl.innerHTML = feedbacks.map((msg, i) => {
+            const st = noteStyles[i % noteStyles.length];
+            return `
+              <div class="sticky-note ${st.bg} ${st.rot} border-3 rounded-2xl p-5 pt-6 shadow-md">
+                <p class="text-sm sm:text-base font-bold leading-relaxed">「${escapeHtml(msg)}」</p>
+                <div class="mt-3 text-right text-xs font-black opacity-70">—— 班上的暖心小天使 🌈</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    /**
+     * 渲染分頁 3：🎲 幸運小抽籤頁面
+     */
+    function renderDistributionView() {
+      const totalSlots = appState.roles.reduce((sum, r) => sum + (Number(r.quota) || 0), 0);
+      const includeUnsub = document.getElementById('checkbox-include-unsubmitted')?.checked;
+      const eligibleCount = includeUnsub ? appState.roster.length : appState.submissions.length;
+
+      const eligibleEl = document.getElementById('dist-eligible-count');
+      const slotsEl = document.getElementById('dist-total-slots');
+      if (eligibleEl) eligibleEl.textContent = eligibleCount;
+      if (slotsEl) slotsEl.textContent = totalSlots;
+
+      if (appState.lastDistribution) {
+        renderDistributionResults(appState.lastDistribution);
+      } else {
+        renderEmptyDistributionState();
+      }
+    }
+
+    /**
+     * 尚未執行抽籤時的預設畫面
+     */
+    function renderEmptyDistributionState() {
+      const roleGrid = document.getElementById('dist-role-cards-grid');
+      if (roleGrid) {
+        roleGrid.innerHTML = appState.roles.map(role => `
+          <div class="candy-card candy-border-sky p-4 opacity-85">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-black text-base text-slate-800">${escapeHtml(role.emoji)} ${escapeHtml(role.name)}</span>
+              <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800">名額 ${role.quota} 位</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400">等待魔法抽籤揭曉當選名單 ✨</p>
+          </div>
+        `).join('');
+      }
+      const tbody = document.getElementById('dist-roster-tbody');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 text-center text-slate-500 font-bold">
+              🎲 請點擊上方的「🎰 開始魔法抽籤！」按鈕，馬上為全班分發小幫手職務！
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    /**
+     * 陣列隨機洗牌工具 (Fisher-Yates Shuffle)
+     */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /**
+     * 觸發魔法抽籤動畫並執行分發演算法
+     */
+    function triggerMagicLottery() {
+      if (appState.roles.length === 0) {
+        showToast('🛠️ 請先在「老師魔法箱」設定至少一個小幫手職務喔！', 'error');
+        return;
+      }
+
+      const includeUnsub = document.getElementById('checkbox-include-unsubmitted')?.checked;
+      if (!includeUnsub && appState.submissions.length === 0) {
+        showToast('✏️ 目前還沒有同學填寫心願單喔！可以先去「老師魔法箱」載入模擬資料體驗～', 'error');
+        return;
+      }
+
+      const overlay = document.getElementById('magic-lottery-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+
+        const result = runDistributionAlgorithm();
+        appState.lastDistribution = result;
+        syncRoomToCloudIfConnected();
+        renderDistributionResults(result);
+        fireConfetti();
+        showToast('🎉 魔法抽籤完成！快來看看當選的小幫手榮譽榜！', 'success');
+      }, 950);
+    }
+
+    /**
+     * 執行志願智慧分發核心演算法
+     */
+    function runDistributionAlgorithm() {
+      const mode = document.querySelector('input[name="dist-mode"]:checked')?.value || 'priority_round';
+      const autoFill = document.getElementById('checkbox-auto-fill')?.checked ?? true;
+      const includeUnsub = document.getElementById('checkbox-include-unsubmitted')?.checked ?? false;
+
+      // 建立各職務剩餘名額映射表
+      const remainingQuota = {};
+      appState.roles.forEach(r => {
+        remainingQuota[r.id] = Number(r.quota) || 0;
+      });
+
+      // 準備參與抽籤的學生名單
+      const subMap = new Map(appState.submissions.map(s => [s.seatNo, s]));
+      let candidates = [];
+
+      if (includeUnsub) {
+        candidates = appState.roster.map(student => {
+          const sub = subMap.get(student.seatNo);
+          return {
+            seatNo: student.seatNo,
+            name: student.name,
+            choices: sub ? (sub.choices || []) : [],
+            pitch: sub ? (sub.pitch || '') : '',
+            hasSubmitted: Boolean(sub)
+          };
+        });
+      } else {
+        candidates = appState.submissions.map(sub => ({
+          seatNo: sub.seatNo,
+          name: sub.name,
+          choices: sub.choices || [],
+          pitch: sub.pitch || '',
+          hasSubmitted: true
+        }));
+      }
+
+      // 紀錄分發結果：seatNo -> { roleId, matchRank }
+      // matchRank: 1(第一志願), 2(第二志願), 3(第三志願), 4(小精靈補位), 0(未分配)
+      const assignedMap = new Map();
+
+      if (mode === 'priority_round') {
+        // 模式一：志願序優先抽籤制（第1輪先抽第一志願，再抽第二志願，再抽第三志願）
+        for (let round = 0; round < 3; round++) {
+          const unassigned = candidates.filter(c => !assignedMap.has(c.seatNo) && c.choices[round]);
+          // 依該輪志願職務分組
+          const applicantsByRole = {};
+          unassigned.forEach(c => {
+            const targetRoleId = c.choices[round];
+            if (!applicantsByRole[targetRoleId]) applicantsByRole[targetRoleId] = [];
+            applicantsByRole[targetRoleId].push(c);
+          });
+
+          Object.keys(applicantsByRole).forEach(roleId => {
+            const slots = remainingQuota[roleId] || 0;
+            if (slots <= 0) return;
+            const shuffled = shuffleArray(applicantsByRole[roleId]);
+            const winners = shuffled.slice(0, slots);
+            winners.forEach(w => {
+              assignedMap.set(w.seatNo, { roleId, matchRank: round + 1 });
+              remainingQuota[roleId]--;
+            });
+          });
+        }
+      } else {
+        // 模式二：幸運號碼牌分發制 (RSD)
+        const queue = shuffleArray(candidates);
+        queue.forEach(student => {
+          for (let i = 0; i < student.choices.length; i++) {
+            const roleId = student.choices[i];
+            if ((remainingQuota[roleId] || 0) > 0) {
+              assignedMap.set(student.seatNo, { roleId, matchRank: i + 1 });
+              remainingQuota[roleId]--;
+              break;
+            }
+          }
+        });
+      }
+
+      // 若開啟小精靈隨機補位：將尚未分配的同學填入剩餘名額
+      if (autoFill) {
+        const stillUnassigned = shuffleArray(candidates.filter(c => !assignedMap.has(c.seatNo)));
+        const openSlotsPool = [];
+        appState.roles.forEach(r => {
+          const left = remainingQuota[r.id] || 0;
+          for (let k = 0; k < left; k++) {
+            openSlotsPool.push(r.id);
+          }
+        });
+        const shuffledSlots = shuffleArray(openSlotsPool);
+
+        stillUnassigned.forEach((student, idx) => {
+          if (idx < shuffledSlots.length) {
+            const assignedRoleId = shuffledSlots[idx];
+            assignedMap.set(student.seatNo, { roleId: assignedRoleId, matchRank: 4 });
+            remainingQuota[assignedRoleId]--;
+          }
+        });
+      }
+
+      // 彙整全班座號總表
+      const rosterResults = appState.roster.map(student => {
+        const sub = subMap.get(student.seatNo);
+        const assignment = assignedMap.get(student.seatNo) || { roleId: null, matchRank: 0 };
+        const roleObj = assignment.roleId ? appState.roles.find(r => r.id === assignment.roleId) : null;
+
+        return {
+          seatNo: student.seatNo,
+          name: student.name,
+          hasSubmitted: Boolean(sub),
+          roleId: assignment.roleId,
+          roleEmoji: roleObj ? roleObj.emoji : '',
+          roleName: roleObj ? roleObj.name : '本次無職務（一般小天使）',
+          matchRank: assignment.matchRank,
+          pitch: sub ? (sub.pitch || '') : ''
+        };
+      });
+
+      // 計算統計指標（以有填寫志願的同學為分母）
+      const submittedResults = rosterResults.filter(r => r.hasSubmitted);
+      const firstChoiceHits = submittedResults.filter(r => r.matchRank === 1).length;
+      const top3Hits = submittedResults.filter(r => r.matchRank >= 1 && r.matchRank <= 3).length;
+      const unassignedCount = candidates.length - assignedMap.size;
+
+      return {
+        timestamp: getNowTimeLabel(),
+        modeLabel: mode === 'priority_round' ? '志願序優先抽籤制' : '幸運號碼牌分發制 (RSD)',
+        totalApplicants: candidates.length,
+        submittedCount: submittedResults.length,
+        firstChoiceHits,
+        top3Hits,
+        unassignedCount,
+        rosterResults
+      };
+    }
+
+    /**
+     * 渲染分發結果卡片與全班座號總表
+     */
+    function renderDistributionResults(dist) {
+      if (!dist) return;
+
+      // 更新頂部指標徽章
+      const firstRate = dist.submittedCount > 0 ? Math.round((dist.firstChoiceHits / dist.submittedCount) * 100) : 0;
+      const top3Rate = dist.submittedCount > 0 ? Math.round((dist.top3Hits / dist.submittedCount) * 100) : 0;
+
+      document.getElementById('dist-metric-first-rate').textContent = `${firstRate}%`;
+      document.getElementById('dist-metric-first-sub').textContent = `${dist.firstChoiceHits} / ${dist.submittedCount} 位填表同學中第一志願`;
+
+      document.getElementById('dist-metric-top3-rate').textContent = `${top3Rate}%`;
+      document.getElementById('dist-metric-top3-sub').textContent = `${dist.top3Hits} / ${dist.submittedCount} 位錄取前三志願`;
+
+      document.getElementById('dist-metric-unassigned').textContent = `${dist.unassignedCount} 人`;
+      document.getElementById('dist-metric-unassigned-sub').textContent = dist.unassignedCount === 0
+        ? '每位參加者都有任務囉！🎉'
+        : '名額已滿，下次再來挑戰！';
+
+      document.getElementById('dist-timestamp-label').textContent =
+        `抽籤時間：${dist.timestamp} ｜ 採用模式：${dist.modeLabel}`;
+
+      // 渲染各職務當選榮譽卡
+      const roleGrid = document.getElementById('dist-role-cards-grid');
+      const cardBorders = ['candy-border-pink', 'candy-border-yellow', 'candy-border-mint', 'candy-border-sky', 'candy-border-grape'];
+
+      roleGrid.innerHTML = appState.roles.map((role, idx) => {
+        const winners = dist.rosterResults.filter(r => r.roleId === role.id);
+        const borderClass = cardBorders[idx % cardBorders.length];
+
+        const winnersHtml = winners.length > 0
+          ? winners.map(w => {
+            const rankBadge = w.matchRank === 1
+              ? '<span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 font-black">🥇 第1志願</span>'
+              : w.matchRank === 2
+              ? '<span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-200 text-sky-950 font-black">🥈 第2志願</span>'
+              : w.matchRank === 3
+              ? '<span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-950 font-black">🥉 第3志願</span>'
+              : '<span class="text-[11px] px-2 py-0.5 rounded-full bg-purple-200 text-purple-950 font-black">🍀 小精靈補位</span>';
+
+            return `
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border-2 border-slate-100">
+                <span class="font-black text-sm text-slate-800">${formatSeatNo(w.seatNo)}號 ${escapeHtml(w.name)}</span>
+                ${rankBadge}
+              </div>
+            `;
+          }).join('')
+          : '<p class="text-xs font-bold text-slate-400 py-2">尚無同學分配到此職務</p>';
+
+        return `
+          <div class="candy-card ${borderClass} p-4 flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between gap-2 pb-2 mb-2.5 border-b-2 border-dashed border-slate-200">
+                <span class="font-black text-base text-slate-800">${escapeHtml(role.emoji)} ${escapeHtml(role.name)}</span>
+                <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                  ${winners.length} / ${role.quota} 位
+                </span>
+              </div>
+              <div class="space-y-2">
+                ${winnersHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 渲染全班座號總表
+      const summaryEl = document.getElementById('dist-table-summary');
+      if (summaryEl) {
+        const assignedTotal = dist.rosterResults.filter(r => r.roleId).length;
+        summaryEl.textContent = `全班 ${dist.rosterResults.length} 人 · 已當選 ${assignedTotal} 人`;
+      }
+
+      const tbody = document.getElementById('dist-roster-tbody');
+      tbody.innerHTML = dist.rosterResults.map(row => {
+        let badgeHtml = '';
+        if (row.matchRank === 1) {
+          badgeHtml = '<span class="px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-black">🥇 第一志願錄取</span>';
+        } else if (row.matchRank === 2) {
+          badgeHtml = '<span class="px-2.5 py-1 rounded-full bg-sky-100 border border-sky-300 text-sky-900 text-xs font-black">🥈 第二志願錄取</span>';
+        } else if (row.matchRank === 3) {
+          badgeHtml = '<span class="px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-black">🥉 第三志願錄取</span>';
+        } else if (row.matchRank === 4) {
+          badgeHtml = '<span class="px-2.5 py-1 rounded-full bg-purple-100 border border-purple-300 text-purple-900 text-xs font-black">🍀 小精靈補位</span>';
+        } else {
+          badgeHtml = '<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">一般小天使</span>';
+        }
+
+        const roleDisplay = row.roleId
+          ? `<span class="text-pink-700 font-black">${escapeHtml(row.roleEmoji)} ${escapeHtml(row.roleName)}</span>`
+          : `<span class="text-slate-400">一般小天使</span>`;
+
+        return `
+          <tr class="hover:bg-sky-50/40 transition">
+            <td class="py-3 px-4 font-black text-slate-700">${formatSeatNo(row.seatNo)} 號</td>
+            <td class="py-3 px-4 font-black text-slate-900">${escapeHtml(row.name)}</td>
+            <td class="py-3 px-4">${roleDisplay}</td>
+            <td class="py-3 px-4">${badgeHtml}</td>
+            <td class="py-3 px-4 text-xs text-slate-600">${row.pitch ? escapeHtml(row.pitch) : '<span class="text-slate-300">--</span>'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 匯出當選名單 CSV 檔案（含 UTF-8 BOM 確保 Excel 開啟不亂碼）
+     */
+    function exportDistributionCSV() {
+      if (!appState.lastDistribution) {
+        showToast('🎲 請先按下「開始魔法抽籤！」產生名單後再匯出喔！', 'error');
+        return;
+      }
+
+      const rankLabels = {
+        1: '第一志願錄取',
+        2: '第二志願錄取',
+        3: '第三志願錄取',
+        4: '小精靈隨機補位',
+        0: '一般小天使'
+      };
+
+      const rows = [
+        ['班級', '座號', '姓名', '當選小幫手職務', '錄取方式', '我的服務宣言']
+      ];
+
+      appState.lastDistribution.rosterResults.forEach(r => {
+        rows.push([
+          appState.className,
+          `${formatSeatNo(r.seatNo)}號`,
+          r.name,
+          r.roleId ? `${r.roleEmoji} ${r.roleName}` : '一般小天使',
+          rankLabels[r.matchRank] || '一般小天使',
+          r.pitch || ''
+        ]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(cols =>
+        cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${appState.className}_班級小幫手當選名單.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('📥 已成功下載 CSV 當選名單！', 'success');
+    }
+
+    /**
+     * 複製適合貼到 LINE 班級群組的公告文字
+     */
+    function copyAnnouncementText() {
+      if (!appState.lastDistribution) {
+        showToast('🎲 請先按下「開始魔法抽籤！」產生名單後再複製公告喔！', 'error');
+        return;
+      }
+
+      const lines = [
+        `🌈 【${appState.className}】最新班級小幫手當選名單出爐囉！ 🎉`,
+        `謝謝每一位願意為班上服務的小朋友，大家一起加油！✨`,
+        ``
+      ];
+
+      appState.roles.forEach(role => {
+        const winners = appState.lastDistribution.rosterResults.filter(r => r.roleId === role.id);
+        const names = winners.length > 0
+          ? winners.map(w => `${formatSeatNo(w.seatNo)}號 ${w.name}`).join('、')
+          : '（從缺）';
+        lines.push(`${role.emoji} ${role.name}：${names}`);
+      });
+
+      copyTextToClipboard(lines.join('\n'), '📋 已複製班級公告文字！可以直接貼到 LINE 群組囉！');
+    }
+
+    /**
+     * 相容 iframe 的剪貼簿複製工具
+     */
+    function copyTextToClipboard(text, successMsg) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg, 'success');
+      } catch (err) {
+        showToast('複製失敗，請手動選取文字複製喔！', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    /**
+     * 渲染分頁 4：🛠️ 老師魔法箱（班級名單、職務管理）
+     */
+    function renderSettings() {
+      const classInput = document.getElementById('input-class-name');
+      if (classInput) classInput.value = appState.className;
+
+      // 更新名單進度徽章與未填寫名單
+      const unsubmitted = getUnsubmittedStudents();
+      const progressBadge = document.getElementById('roster-progress-badge');
+      if (progressBadge) {
+        progressBadge.textContent = `全班共 ${appState.roster.length} 人｜已完成 ${appState.submissions.length} 人｜尚未填寫 ${unsubmitted.length} 人`;
+      }
+
+      const unsubPill = document.getElementById('unsubmitted-count-pill');
+      const unsubText = document.getElementById('settings-unsubmitted-text');
+      if (unsubPill) unsubPill.textContent = `${unsubmitted.length} 人`;
+      if (unsubText) {
+        if (unsubmitted.length === 0) {
+          unsubText.textContent = '太棒了！全班都填寫完成囉！🎉';
+        } else {
+          unsubText.textContent = unsubmitted.map(s => `${formatSeatNo(s.seatNo)}號 ${s.name}`).join('、');
+        }
+      }
+
+      // 渲染全班名單卡片一覽
+      const rosterGrid = document.getElementById('settings-roster-grid');
+      const submittedSet = new Set(appState.submissions.map(s => s.seatNo));
+
+      if (rosterGrid) {
+        if (appState.roster.length === 0) {
+          rosterGrid.innerHTML = '<p class="col-span-full text-center py-6 text-slate-400 font-bold">目前名單是空的，請從上方新增學生喔！</p>';
+        } else {
+          rosterGrid.innerHTML = appState.roster.map(student => {
+            const isDone = submittedSet.has(student.seatNo);
+            const isEditing = appState.editingSeatNo === student.seatNo;
+
+            if (isEditing) {
+              return `
+                <div class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-400 flex items-center gap-2">
+                  <span class="font-black text-xs text-amber-800 shrink-0">${formatSeatNo(student.seatNo)}號</span>
+                  <input type="text" id="edit-roster-input-${student.seatNo}" value="${escapeHtml(student.name)}" maxlength="15"
+                    class="flex-1 min-w-0 px-2.5 py-1 rounded-lg border-2 border-amber-400 bg-white font-bold text-sm text-slate-800 outline-hidden" />
+                  <button type="button" onclick="saveEditRosterRow(${student.seatNo})"
+                    class="px-2.5 py-1 rounded-lg bg-emerald-500 text-white font-black text-xs cursor-pointer shrink-0">儲存</button>
+                  <button type="button" onclick="cancelEditRosterRow()"
+                    class="px-2 py-1 rounded-lg bg-slate-200 text-slate-700 font-black text-xs cursor-pointer shrink-0">取消</button>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="p-3 rounded-2xl bg-slate-50/90 border-2 border-slate-200 hover:border-pink-300 flex items-center justify-between gap-2 transition">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="px-2 py-0.5 rounded-lg bg-pink-100 text-pink-800 font-black text-xs shrink-0">
+                    ${formatSeatNo(student.seatNo)}號
+                  </span>
+                  <span class="font-black text-sm text-slate-800 truncate">${escapeHtml(student.name)}</span>
+                  ${isDone
+                    ? '<span class="text-[11px] font-black text-emerald-600 shrink-0">✅</span>'
+                    : '<span class="text-[11px] font-bold text-slate-400 shrink-0">未填</span>'}
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" onclick="startEditRosterRow(${student.seatNo})" title="修改姓名"
+                    class="px-2 py-1 rounded-lg bg-white hover:bg-amber-100 border border-slate-200 text-xs font-bold text-slate-600 cursor-pointer">
+                    ✏️
+                  </button>
+                  <button type="button" onclick="deleteRosterStudent(${student.seatNo})" title="刪除學生"
+                    class="px-2 py-1 rounded-lg bg-white hover:bg-rose-100 border border-slate-200 text-xs font-bold text-rose-600 cursor-pointer">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 渲染職務與名額列表
+      const totalQuota = appState.roles.reduce((sum, r) => sum + (Number(r.quota) || 0), 0);
+      const quotaBadge = document.getElementById('settings-total-quota-badge');
+      if (quotaBadge) quotaBadge.textContent = `總名額：${totalQuota} 位`;
+
+      const rolesList = document.getElementById('settings-roles-list');
+      if (rolesList) {
+        rolesList.innerHTML = appState.roles.map(role => `
+          <div class="p-3.5 rounded-2xl bg-white border-2 border-emerald-200 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">${escapeHtml(role.emoji)}</span>
+                <span class="font-black text-sm sm:text-base text-slate-800 truncate">${escapeHtml(role.name)}</span>
+              </div>
+              <p class="text-xs font-bold text-slate-400 truncate mt-0.5">${escapeHtml(role.desc || '')}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="updateRoleQuota('${role.id}', -1)"
+                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-slate-700 cursor-pointer">-</button>
+              <span class="w-10 text-center font-black text-sm text-emerald-700">${role.quota} 位</span>
+              <button type="button" onclick="updateRoleQuota('${role.id}', 1)"
+                class="w-7 h-7 rounded-lg bg-emerald-100 hover:bg-emerald-200 font-black text-emerald-800 cursor-pointer">+</button>
+              <button type="button" onclick="deleteRole('${role.id}')" title="刪除此職務"
+                class="ml-1 px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-black cursor-pointer">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 同步渲染後台填報明細資料表
+      renderBackendSubmissionsTable();
+    }
+
+    /**
+     * 渲染後台「全班填報明細與資料整理中心」表格
+     */
+    function renderBackendSubmissionsTable() {
+      const tbody = document.getElementById('backend-submissions-tbody');
+      const countEl = document.getElementById('backend-filter-count');
+      if (!tbody) return;
+
+      const filterStatus = document.getElementById('backend-filter-status')?.value || 'all';
+      const keyword = (document.getElementById('backend-search-input')?.value || '').trim().toLowerCase();
+
+      const subMap = new Map(appState.submissions.map(s => [s.seatNo, s]));
+      const roleMap = new Map(appState.roles.map(r => [r.id, r]));
+
+      // 整合全班名單與填報紀錄
+      let rows = appState.roster.map(student => ({
+        seatNo: student.seatNo,
+        name: student.name,
+        sub: subMap.get(student.seatNo) || null
+      }));
+
+      // 狀態篩選
+      if (filterStatus === 'submitted') {
+        rows = rows.filter(r => Boolean(r.sub));
+      } else if (filterStatus === 'unsubmitted') {
+        rows = rows.filter(r => !r.sub);
+      }
+
+      // 關鍵字搜尋（座號或姓名）
+      if (keyword) {
+        rows = rows.filter(r =>
+          formatSeatNo(r.seatNo).includes(keyword) ||
+          String(r.seatNo).includes(keyword) ||
+          r.name.toLowerCase().includes(keyword)
+        );
+      }
+
+      if (countEl) {
+        countEl.textContent = `顯示 ${rows.length} 筆`;
+      }
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400 font-bold">
+              找不到符合條件的學生資料喔！
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(row => {
+        const sub = row.sub;
+        if (!sub) {
+          return `
+            <tr class="bg-slate-50/50 hover:bg-amber-50/40 transition">
+              <td class="py-3 px-3.5 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded-lg bg-slate-200 text-slate-700 font-black text-xs mr-1.5">${formatSeatNo(row.seatNo)}號</span>
+                <span class="font-black text-slate-800">${escapeHtml(row.name)}</span>
+              </td>
+              <td class="py-3 px-3.5 whitespace-nowrap">
+                <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black">⏳ 尚未填寫</span>
+              </td>
+              <td colspan="3" class="py-3 px-3.5 text-xs text-slate-400">
+                尚未送出心願單
+              </td>
+              <td class="py-3 px-3.5 text-right whitespace-nowrap">
+                <button type="button" onclick="editStudentSubmissionFromBackend(${row.seatNo})"
+                  class="candy-btn px-3 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 font-black text-xs cursor-pointer">
+                  ✏️ 幫他代填
+                </button>
+              </td>
+            </tr>
+          `;
+        }
+
+        // 志願徽章
+        const rankIcons = ['🥇', '🥈', '🥉'];
+        const choicesHtml = (sub.choices || []).map((cId, idx) => {
+          const rObj = roleMap.get(cId);
+          const label = rObj ? `${rObj.emoji}${rObj.name}` : '已刪除職務';
+          return `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 text-xs font-black mr-1 mb-1">${rankIcons[idx] || ''} ${escapeHtml(label)}</span>`;
+        }).join('');
+
+        // 各幹部評分小標籤
+        const ratingsHtml = appState.roles.map(r => {
+          const sc = sub.ratings ? Number(sub.ratings[r.id]) : 0;
+          return `<span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-bold mr-1 mb-1" title="${escapeHtml(r.name)}">${escapeHtml(r.emoji)}${sc > 0 ? sc + '★' : '-'}</span>`;
+        }).join('');
+
+        // 宣言與留言
+        const pitchPart = sub.pitch ? `<div class="text-emerald-800 text-xs">🌈 宣言：${escapeHtml(sub.pitch)}</div>` : '';
+        const feedbackPart = sub.feedback ? `<div class="text-purple-800 text-xs mt-0.5">💌 悄悄話：${escapeHtml(sub.feedback)}</div>` : '';
+        const notesHtml = (pitchPart || feedbackPart) ? `${pitchPart}${feedbackPart}` : '<span class="text-slate-300 text-xs">（無文字留言）</span>';
+
+        return `
+          <tr class="hover:bg-sky-50/40 transition">
+            <td class="py-3 px-3.5 whitespace-nowrap align-top">
+              <span class="px-2 py-0.5 rounded-lg bg-pink-100 text-pink-800 font-black text-xs mr-1.5">${formatSeatNo(row.seatNo)}號</span>
+              <span class="font-black text-slate-900">${escapeHtml(row.name)}</span>
+            </td>
+            <td class="py-3 px-3.5 whitespace-nowrap align-top">
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">✅ 已完成</span>
+              <div class="text-[11px] text-slate-400 mt-1">${escapeHtml(sub.updatedAt || '')}</div>
+            </td>
+            <td class="py-3 px-3.5 align-top">${choicesHtml}</td>
+            <td class="py-3 px-3.5 align-top">${ratingsHtml}</td>
+            <td class="py-3 px-3.5 align-top">${notesHtml}</td>
+            <td class="py-3 px-3.5 text-right whitespace-nowrap align-top space-x-1">
+              <button type="button" onclick="editStudentSubmissionFromBackend(${row.seatNo})"
+                class="candy-btn px-2.5 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 font-black text-xs cursor-pointer">
+                ✏️ 修改
+              </button>
+              <button type="button" onclick="deleteSingleSubmission(${row.seatNo})"
+                class="candy-btn px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs cursor-pointer">
+                🗑️ 刪除
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 從後台點擊「修改」或「幫他代填」，自動切換至填報表單並選好該學生
+     */
+    function editStudentSubmissionFromBackend(seatNo) {
+      switchTab('form');
+      const selectEl = document.getElementById('select-student');
+      if (selectEl) {
+        selectEl.value = String(seatNo);
+        handleStudentSelectChange();
+        const existingSub = appState.submissions.find(s => s.seatNo === seatNo);
+        if (existingSub) {
+          loadExistingSubmissionIntoForm(existingSub);
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * 刪除單一學生的填報紀錄（保留該生在班級名單中）
+     */
+    function deleteSingleSubmission(seatNo) {
+      const sub = appState.submissions.find(s => s.seatNo === seatNo);
+      if (!sub) return;
+
+      openConfirmModal(
+        '刪除單筆填報紀錄',
+        `確定要刪除「${formatSeatNo(seatNo)} 號 ${sub.name}」的填報紀錄嗎？（刪除後該生會恢復為「尚未填寫」，可重新填寫）`,
+        () => {
+          appState.submissions = appState.submissions.filter(s => s.seatNo !== seatNo);
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.deleteSubmission(cloudState.roomCode, seatNo);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast(`🗑️ 已刪除 ${formatSeatNo(seatNo)} 號 ${sub.name} 的填報紀錄`, 'info');
+        }
+      );
+    }
+
+    /**
+     * 匯出全班完整原始調查資料 CSV（含每位幹部星等、三個志願、服務宣言與悄悄話）
+     */
+    function exportFullSurveyCSV() {
+      const roleHeaders = appState.roles.map(r => `${r.name}(星等)`);
+      const headers = [
+        '班級',
+        '座號',
+        '姓名',
+        '填寫狀態',
+        '填寫時間',
+        ...roleHeaders,
+        '平均給分',
+        '第一志願',
+        '第二志願',
+        '第三志願',
+        '我的服務宣言',
+        '悄悄話留言'
+      ];
+
+      const subMap = new Map(appState.submissions.map(s => [s.seatNo, s]));
+      const roleMap = new Map(appState.roles.map(r => [r.id, r]));
+
+      const rows = [headers];
+      appState.roster.forEach(student => {
+        const sub = subMap.get(student.seatNo);
+        if (!sub) {
+          rows.push([
+            appState.className,
+            `${formatSeatNo(student.seatNo)}號`,
+            student.name,
+            '尚未填寫',
+            '',
+            ...appState.roles.map(() => ''),
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+          ]);
+          return;
+        }
+
+        let sum = 0;
+        let count = 0;
+        const ratingCols = appState.roles.map(r => {
+          const val = sub.ratings ? Number(sub.ratings[r.id]) : 0;
+          if (val > 0) {
+            sum += val;
+            count++;
+            return val;
+          }
+          return '';
+        });
+        const avgStr = count > 0 ? (sum / count).toFixed(2) : '';
+
+        const getChoiceName = (idx) => {
+          const cId = sub.choices ? sub.choices[idx] : '';
+          const rObj = roleMap.get(cId);
+          return rObj ? rObj.name : '';
+        };
+
+        rows.push([
+          appState.className,
+          `${formatSeatNo(student.seatNo)}號`,
+          student.name,
+          '已完成',
+          sub.updatedAt || '',
+          ...ratingCols,
+          avgStr,
+          getChoiceName(0),
+          getChoiceName(1),
+          getChoiceName(2),
+          sub.pitch || '',
+          sub.feedback || ''
+        ]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(cols =>
+        cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${appState.className}_全班滿意度與志願完整明細表.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('📥 已匯出全班滿意度與志願完整 Excel (CSV) 明細表！', 'success');
+    }
+
+    /**
+     * 下載 JSON 完整備份檔（方便老師跨電腦保存或轉移資料）
+     */
+    function exportBackupJSON() {
+      const backupObj = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        className: appState.className,
+        roster: appState.roster,
+        roles: appState.roles,
+        submissions: appState.submissions,
+        lastDistribution: appState.lastDistribution
+      };
+
+      const jsonStr = JSON.stringify(backupObj, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${appState.className}_小幫手系統備份檔.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('💾 已下載系統資料備份檔 (.json)！', 'success');
+    }
+
+    /**
+     * 觸發選擇 JSON 備份檔還原
+     */
+    function triggerImportBackupJSON() {
+      const inputEl = document.getElementById('input-import-backup');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.click();
+      }
+    }
+
+    /**
+     * 讀取並還原 JSON 備份檔
+     */
+    function handleImportBackupJSON(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!Array.isArray(parsed.roster) || !Array.isArray(parsed.roles) || !Array.isArray(parsed.submissions)) {
+            throw new Error('備份檔格式不正確');
+          }
+          const oldSeats = appState.submissions.map(s => s.seatNo);
+          appState.className = parsed.className || appState.className;
+          appState.roster = parsed.roster.sort((a, b) => a.seatNo - b.seatNo);
+          appState.roles = parsed.roles;
+          appState.submissions = parsed.submissions.sort((a, b) => a.seatNo - b.seatNo);
+          appState.lastDistribution = parsed.lastDistribution || null;
+
+          syncRoomToCloudIfConnected();
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.replaceAllSubmissions(cloudState.roomCode, appState.submissions, oldSeats);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast(`📂 已成功還原「${appState.className}」的備份資料！`, 'success');
+        } catch (err) {
+          showToast('⚠️ 讀取備份檔失敗，請確認檔案是否完整！', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /**
+     * 儲存班級名稱設定
+     */
+    function saveClassNameSetting() {
+      const val = document.getElementById('input-class-name').value.trim();
+      if (!val) {
+        showToast('🏫 請輸入班級名稱喔！', 'error');
+        return;
+      }
+      appState.className = val;
+      syncRoomToCloudIfConnected();
+      updateGlobalHeaderStats();
+      showToast(`🏫 班級名稱已更新為「${val}」！`, 'success');
+    }
+
+    /**
+     * 複製尚未填寫的學生名單
+     */
+    function copyUnsubmittedNames() {
+      const unsubmitted = getUnsubmittedStudents();
+      if (unsubmitted.length === 0) {
+        showToast('🎉 全班都填寫完成囉，沒有未填名單！', 'success');
+        return;
+      }
+      const text = `⏳ 【${appState.className}】還沒填寫班級小幫手心願單的小朋友（共 ${unsubmitted.length} 人）：\n` +
+        unsubmitted.map(s => `${formatSeatNo(s.seatNo)}號 ${s.name}`).join('、');
+      copyTextToClipboard(text, '📋 已複製未填寫的小朋友名單！');
+    }
+
+    /**
+     * 展開或收起批次貼上匯入名單區塊
+     */
+    function toggleBatchImportPanel() {
+      const panel = document.getElementById('batch-import-panel');
+      if (panel) panel.classList.toggle('hidden');
+    }
+
+    /**
+     * 單筆快速新增或更新學生名單
+     */
+    function addOrUpdateSingleStudent() {
+      const seatInput = document.getElementById('new-student-seat');
+      const nameInput = document.getElementById('new-student-name');
+      const seatNo = Number(seatInput.value);
+      const name = nameInput.value.trim();
+
+      if (!seatNo || seatNo < 1 || seatNo > 99) {
+        showToast('🎒 請輸入有效的座號（1～99）！', 'error');
+        return;
+      }
+      if (!name) {
+        showToast('✏️ 請輸入學生姓名喔！', 'error');
+        return;
+      }
+
+      const idx = appState.roster.findIndex(s => s.seatNo === seatNo);
+      if (idx !== -1) {
+        appState.roster[idx].name = name;
+        const subIdx = appState.submissions.findIndex(s => s.seatNo === seatNo);
+        if (subIdx !== -1) appState.submissions[subIdx].name = name;
+        showToast(`✅ 已更新 ${formatSeatNo(seatNo)} 號為「${name}」！`, 'success');
+      } else {
+        appState.roster.push({ seatNo, name });
+        appState.roster.sort((a, b) => a.seatNo - b.seatNo);
+        showToast(`🎉 已將 ${formatSeatNo(seatNo)} 號「${name}」加入名單！`, 'success');
+      }
+
+      seatInput.value = '';
+      nameInput.value = '';
+      syncRoomToCloudIfConnected();
+      updateGlobalHeaderStats();
+      renderSettings();
+    }
+
+    /**
+     * 批次解析並匯入學生名單（支援合併或覆蓋）
+     */
+    function handleBatchImportRoster(mode) {
+      const raw = document.getElementById('batch-roster-textarea').value.trim();
+      if (!raw) {
+        showToast('📋 請先貼上學生名單再匯入喔！', 'error');
+        return;
+      }
+
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const parsed = [];
+      let autoSeat = 1;
+
+      lines.forEach(line => {
+        // 支援「01 陳小樂」、「1,陳小樂」、「1\t陳小樂」或純姓名
+        const match = line.match(/^(\d{1,2})[\s,，、\.\-:\t]+(.+)$/);
+        if (match) {
+          const sNo = Number(match[1]);
+          const sName = match[2].trim();
+          if (sNo >= 1 && sName) {
+            parsed.push({ seatNo: sNo, name: sName });
+            autoSeat = Math.max(autoSeat, sNo + 1);
+          }
+        } else {
+          parsed.push({ seatNo: autoSeat++, name: line });
+        }
+      });
+
+      if (parsed.length === 0) {
+        showToast('⚠️ 無法辨識名單內容，請檢查格式後再試一次！', 'error');
+        return;
+      }
+
+      if (mode === 'overwrite') {
+        const dedupMap = new Map();
+        parsed.forEach(p => dedupMap.set(p.seatNo, p));
+        appState.roster = Array.from(dedupMap.values()).sort((a, b) => a.seatNo - b.seatNo);
+        // 清除不在新名單內的填報紀錄，並同步姓名
+        const validSeatSet = new Set(appState.roster.map(s => s.seatNo));
+        appState.submissions = appState.submissions
+          .filter(sub => validSeatSet.has(sub.seatNo))
+          .map(sub => {
+            const st = appState.roster.find(s => s.seatNo === sub.seatNo);
+            return { ...sub, name: st ? st.name : sub.name };
+          });
+        showToast(`🔄 已覆蓋匯入共 ${appState.roster.length} 位學生名單！`, 'success');
+      } else {
+        parsed.forEach(p => {
+          const idx = appState.roster.findIndex(s => s.seatNo === p.seatNo);
+          if (idx !== -1) {
+            appState.roster[idx].name = p.name;
+          } else {
+            appState.roster.push(p);
+          }
+          const subIdx = appState.submissions.findIndex(s => s.seatNo === p.seatNo);
+          if (subIdx !== -1) appState.submissions[subIdx].name = p.name;
+        });
+        appState.roster.sort((a, b) => a.seatNo - b.seatNo);
+        showToast(`➕ 已成功合併匯入 ${parsed.length} 筆學生資料！`, 'success');
+      }
+
+      document.getElementById('batch-roster-textarea').value = '';
+      syncRoomToCloudIfConnected();
+      updateGlobalHeaderStats();
+      renderSettings();
+    }
+
+    /**
+     * 行內編輯名單姓名
+     */
+    function startEditRosterRow(seatNo) {
+      appState.editingSeatNo = seatNo;
+      renderSettings();
+      const inputEl = document.getElementById(`edit-roster-input-${seatNo}`);
+      if (inputEl) inputEl.focus();
+    }
+
+    function saveEditRosterRow(seatNo) {
+      const inputEl = document.getElementById(`edit-roster-input-${seatNo}`);
+      const newName = inputEl ? inputEl.value.trim() : '';
+      if (!newName) {
+        showToast('✏️ 姓名不能空白喔！', 'error');
+        return;
+      }
+      const student = appState.roster.find(s => s.seatNo === seatNo);
+      if (student) student.name = newName;
+
+      const sub = appState.submissions.find(s => s.seatNo === seatNo);
+      if (sub) sub.name = newName;
+
+      appState.editingSeatNo = null;
+      syncRoomToCloudIfConnected();
+      renderSettings();
+      showToast(`✅ 已更新 ${formatSeatNo(seatNo)} 號姓名為「${newName}」！`, 'success');
+    }
+
+    function cancelEditRosterRow() {
+      appState.editingSeatNo = null;
+      renderSettings();
+    }
+
+    function deleteRosterStudent(seatNo) {
+      const student = appState.roster.find(s => s.seatNo === seatNo);
+      if (!student) return;
+      openConfirmModal(
+        '刪除學生確認',
+        `確定要從名單中刪除「${formatSeatNo(seatNo)} 號 ${student.name}」嗎？（若有填報紀錄也會一併移除）`,
+        () => {
+          appState.roster = appState.roster.filter(s => s.seatNo !== seatNo);
+          appState.submissions = appState.submissions.filter(s => s.seatNo !== seatNo);
+          syncRoomToCloudIfConnected();
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.deleteSubmission(cloudState.roomCode, seatNo);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast(`🗑️ 已移除 ${formatSeatNo(seatNo)} 號 ${student.name}`, 'info');
+        }
+      );
+    }
+
+    /**
+     * 新增小幫手職務
+     */
+    function addNewRole() {
+      const emoji = document.getElementById('new-role-emoji').value;
+      const name = document.getElementById('new-role-name').value.trim();
+      const quota = Math.max(1, Math.min(20, Number(document.getElementById('new-role-quota').value) || 1));
+      const desc = document.getElementById('new-role-desc').value.trim() || '熱心協助班級事務的好幫手';
+
+      if (!name) {
+        showToast('🌟 請輸入新職務名稱喔！', 'error');
+        return;
+      }
+
+      const newId = 'role_custom_' + Date.now();
+      appState.roles.push({ id: newId, emoji, name, quota, desc });
+
+      document.getElementById('new-role-name').value = '';
+      document.getElementById('new-role-desc').value = '';
+      syncRoomToCloudIfConnected();
+      updateGlobalHeaderStats();
+      renderSettings();
+      showToast(`✨ 已新增「${emoji} ${name}」（名額 ${quota} 位）！`, 'success');
+    }
+
+    /**
+     * 增減職務名額
+     */
+    function updateRoleQuota(roleId, delta) {
+      const role = appState.roles.find(r => r.id === roleId);
+      if (!role) return;
+      const nextQuota = (Number(role.quota) || 1) + delta;
+      if (nextQuota < 1) {
+        showToast('名額最少需要 1 位喔！若不需要請按右邊垃圾桶刪除～', 'info');
+        return;
+      }
+      role.quota = nextQuota;
+      syncRoomToCloudIfConnected();
+      updateGlobalHeaderStats();
+      renderSettings();
+    }
+
+    /**
+     * 刪除職務
+     */
+    function deleteRole(roleId) {
+      if (appState.roles.length <= 3) {
+        showToast('⚠️ 班上至少需要保留 3 個職務，小朋友才能選第一、二、三志願喔！', 'error');
+        return;
+      }
+      const role = appState.roles.find(r => r.id === roleId);
+      if (!role) return;
+
+      openConfirmModal(
+        '刪除職務確認',
+        `確定要刪除「${role.emoji} ${role.name}」嗎？`,
+        () => {
+          appState.roles = appState.roles.filter(r => r.id !== roleId);
+          syncRoomToCloudIfConnected();
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast(`🗑️ 已刪除「${role.name}」`, 'info');
+        }
+      );
+    }
+
+    /**
+     * 老師魔法工具 1：依目前全班名單一鍵載入模擬填報資料
+     */
+    function confirmLoadFullClassMock() {
+      if (appState.roster.length === 0 || appState.roles.length < 3) {
+        showToast('請確保班級名單不為空，且至少有 3 個職務喔！', 'error');
+        return;
+      }
+
+      openConfirmModal(
+        '載入全班模擬填報資料',
+        `確定要為目前名單中的全部 ${appState.roster.length} 位小朋友產生模擬評分與志願資料嗎？（會覆蓋現有的填報紀錄）`,
+        () => {
+          const sampleFeedbacks = [
+            '謝謝這學期的小幫手們每天都很認真幫忙！',
+            '衛生股長檢查掃地好仔細，教室變得很乾淨！',
+            '希望午餐小幫手打湯時可以小心燙喔，辛苦了！',
+            '學藝股長把黑板字寫得好整齊，大家都看得很清楚！',
+            '體育股長帶暖身操超有精神的！',
+            '',
+            ''
+          ];
+          const samplePitches = [
+            '我每天都很準時，會認真把任務做好！',
+            '我很喜歡幫忙老師和同學，大家有需要都可以找我！',
+            '我會細心檢查每一件事，讓班上變得更整齊乾淨！',
+            '我會熱心協助大家，當個負責任的小幫手！'
+          ];
+          const oldSeats = appState.submissions.map(s => s.seatNo);
+          appState.submissions = appState.roster.map((student, idx) => {
+            const ratings = {};
+            appState.roles.forEach(r => {
+              // 產生 4 或 5 顆星為主的溫馨評分
+              ratings[r.id] = Math.random() < 0.72 ? 5 : 4;
+            });
+            const shuffledRoles = shuffleArray(appState.roles).slice(0, 3).map(r => r.id);
+            return {
+              seatNo: student.seatNo,
+              name: student.name,
+              ratings,
+              feedback: sampleFeedbacks[idx % sampleFeedbacks.length],
+              choices: shuffledRoles,
+              pitch: samplePitches[idx % samplePitches.length],
+              updatedAt: getNowTimeLabel()
+            };
+          });
+
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.replaceAllSubmissions(cloudState.roomCode, appState.submissions, oldSeats);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          fireConfetti();
+          showToast(`🧪 已為全班 ${appState.roster.length} 位同學產生模擬填報資料！快去榮譽榜或抽籤看看吧！`, 'success');
+        }
+      );
+    }
+
+    /**
+     * 老師魔法工具 2：還原預設 24 人名單與範例
+     */
+    function confirmRestoreDefaultRoster() {
+      openConfirmModal(
+        '還原預設名單與範例',
+        '確定要恢復預設的 01～24 號國小中年級範例名單、職務與 12 筆範例填報嗎？',
+        () => {
+          const oldSeats = appState.submissions.map(s => s.seatNo);
+          appState.className = '快樂國小 三年甲班';
+          appState.roster = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+          appState.roles = JSON.parse(JSON.stringify(DEFAULT_ROLES));
+          appState.submissions = JSON.parse(JSON.stringify(MOCK_STUDENTS_POOL));
+          appState.lastDistribution = null;
+          syncRoomToCloudIfConnected();
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.replaceAllSubmissions(cloudState.roomCode, appState.submissions, oldSeats);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast('🔄 已還原預設 24 人名單與範例資料！', 'success');
+        }
+      );
+    }
+
+    /**
+     * 老師魔法工具 3：清空所有填報紀錄（保留班級名單與職務）
+     */
+    function confirmClearAllSubmissions() {
+      openConfirmModal(
+        '清空所有填報紀錄',
+        '確定要清空目前所有的學生評分與志願紀錄嗎？（班級學生名單與職務名額會完整保留，方便讓全班正式開始填寫！）',
+        () => {
+          const oldSeats = appState.submissions.map(s => s.seatNo);
+          appState.submissions = [];
+          appState.lastDistribution = null;
+          appState.formRatings = {};
+          syncRoomToCloudIfConnected();
+          if (cloudState.connected && window.FirebaseSyncEngine) {
+            window.FirebaseSyncEngine.replaceAllSubmissions(cloudState.roomCode, [], oldSeats);
+          }
+          updateGlobalHeaderStats();
+          renderSettings();
+          showToast('🧹 已清空所有填報紀錄，現在可以讓全班正式填寫囉！', 'success');
+        }
+      );
+    }
+
+    /**
+     * 自訂確認對話框 Modal
+     */
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      confirmModalCallback = onConfirm;
+
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      confirmModalCallback = null;
+    }
+
+    /**
+     * 可愛漂浮通知 Toast
+     */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const styleMap = {
+        success: 'bg-emerald-50 border-emerald-400 text-emerald-950 shadow-[0_5px_0_0_#059669]',
+        error: 'bg-rose-50 border-rose-400 text-rose-950 shadow-[0_5px_0_0_#E11D48]',
+        info: 'bg-amber-50 border-amber-400 text-amber-950 shadow-[0_5px_0_0_#D97706]'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3.5 rounded-2xl border-3 font-black text-xs sm:text-sm animate-bounce-in ${styleMap[type] || styleMap.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3200);
+    }
+
+    /**
+     * 五彩紙花慶祝特效 (Confetti)
+     */
+    function fireConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#FF7EB9', '#FFD166', '#06D6A0', '#4CC9F0', '#A78BFA', '#FF65A3'];
+      const pieces = [];
+      for (let i = 0; i < 95; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * canvas.height * 0.4,
+          w: 8 + Math.random() * 8,
+          h: 6 + Math.random() * 6,
+          color: colors[i % colors.length],
+          vx: (Math.random() - 0.5) * 4,
+          vy: 3 + Math.random() * 4,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.15
+        });
+      }
+
+      let animId = null;
+      function renderFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let activeCount = 0;
+
+        pieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vRot;
+          if (p.y < canvas.height + 30) activeCount++;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (activeCount > 0) {
+          animId = requestAnimationFrame(renderFrame);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animId);
+        }
+      }
+
+      renderFrame();
+    }
+
+    /**
+     * 切換四大功能分頁（小朋友填一填 / 班級榮譽榜 / 幸運小抽籤 / 老師魔法箱）
+     */
+    function switchTab(tabName) {
+      const validTabs = ['form', 'dashboard', 'distribution', 'settings'];
+      const targetTab = validTabs.includes(tabName) ? tabName : 'form';
+      appState.activeTab = targetTab;
+
+      // 隱藏所有分頁並顯示目標分頁
+      validTabs.forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        if (viewEl) {
+          if (t === targetTab) {
+            viewEl.classList.remove('hidden');
+          } else {
+            viewEl.classList.add('hidden');
+          }
+        }
+      });
+
+      // 更新導覽列膠囊按鈕的選中／未選中童趣樣式
+      const activeStyles = {
+        form: 'bg-gradient-to-r from-[#FF7EB9] to-[#FF65A3] text-white border-3 border-pink-300 shadow-[0_4px_0_0_#BE185D] scale-[1.02]',
+        dashboard: 'bg-gradient-to-r from-[#FFD166] to-[#FBBF24] text-amber-950 border-3 border-amber-300 shadow-[0_4px_0_0_#D97706] scale-[1.02]',
+        distribution: 'bg-gradient-to-r from-[#06D6A0] to-[#34D399] text-emerald-950 border-3 border-emerald-300 shadow-[0_4px_0_0_#059669] scale-[1.02]',
+        settings: 'bg-gradient-to-r from-[#4CC9F0] to-[#A78BFA] text-white border-3 border-sky-300 shadow-[0_4px_0_0_#0284C7] scale-[1.02]'
+      };
+      const inactiveStyle = 'bg-white hover:bg-amber-50 text-slate-700 border-3 border-slate-200 shadow-[0_3px_0_0_#CBD5E1]';
+
+      validTabs.forEach(t => {
+        const btnEl = document.getElementById(`tab-btn-${t}`);
+        if (!btnEl) return;
+        const baseClasses = 'tab-btn candy-btn flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-2xl font-black text-xs sm:text-base cursor-pointer transition-all';
+        btnEl.className = `${baseClasses} ${t === targetTab ? activeStyles[t] : inactiveStyle}`;
+      });
+
+      refreshCurrentActiveView();
+    }
+
+    /**
+     * 初始化應用程式預設資料並自動啟動專屬 Firebase 雲端連線
+     */
+    function initializeAppState() {
+      appState.className = '三年4班';
+      appState.roster = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+      appState.roles = JSON.parse(JSON.stringify(DEFAULT_ROLES));
+      appState.submissions = JSON.parse(JSON.stringify(MOCK_STUDENTS_POOL));
+      appState.lastDistribution = null;
+      appState.formRatings = {};
+      appState.editingSeatNo = null;
+
+      // 預填老師專屬 Firebase 設定與預設教室代碼 304
+      const cfgInput = document.getElementById('input-firebase-config');
+      const roomInput = document.getElementById('input-room-code');
+      if (cfgInput && !cfgInput.value.trim()) {
+        cfgInput.value = JSON.stringify(USER_EMBEDDED_FIREBASE_CONFIG, null, 2);
+      }
+      if (roomInput && !roomInput.value.trim()) {
+        roomInput.value = DEFAULT_CLASS_ROOM_CODE;
+      }
+
+      // 優先檢查網址 Hash 是否帶有分享連線參數；若無則自動連線至內建專案 dhes-115-304 (代碼 304)
+      const connectWhenReady = (attemptsLeft = 10) => {
+        if (window.FirebaseSyncEngine) {
+          if (window.FirebaseSyncEngine.hasBuiltinConfig()) {
+            const builtinBtn = document.getElementById('btn-use-builtin-firebase');
+            if (builtinBtn) builtinBtn.classList.remove('hidden');
+          }
+          const connectedFromHash = tryAutoConnectFromUrlHash();
+          if (!connectedFromHash && USER_EMBEDDED_FIREBASE_CONFIG && USER_EMBEDDED_FIREBASE_CONFIG.apiKey) {
+            startCloudConnection(USER_EMBEDDED_FIREBASE_CONFIG, DEFAULT_CLASS_ROOM_CODE, false);
+          }
+        } else if (attemptsLeft > 0) {
+          setTimeout(() => connectWhenReady(attemptsLeft - 1), 150);
+        }
+      };
+
+      connectWhenReady();
+    }
+
+    /**
+     * 網頁載入完成後初始化應用程式
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeAppState();
+      updateGlobalHeaderStats();
+      updateCloudSyncUI();
+      const surveyForm = document.getElementById('student-survey-form');
+      if (surveyForm) {
+        surveyForm.addEventListener('submit', handleFormSubmit);
+      }
+
+      const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+      if (modalConfirmBtn) {
+        modalConfirmBtn.addEventListener('click', () => {
+          if (typeof confirmModalCallback === 'function') {
+            confirmModalCallback();
+          }
+          closeConfirmModal();
+        });
+      }
+
+      // 預設進入「✏️ 小朋友填一填」分頁
+      switchTab('form');
+    });
+  </script>
+</body>
+</html>
